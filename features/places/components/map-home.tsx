@@ -6,10 +6,8 @@ import { toast } from "sonner";
 import { mockPlaces } from "@/features/places/data/mock-places";
 import { MapHomeToolbar } from "@/features/places/components/map-home-toolbar";
 import { PlaceList } from "@/features/places/components/place-list";
-import {
-  PlacePanel,
-  type PlacePanelSnap,
-} from "@/features/places/components/place-panel";
+import { PlaceListSheet } from "@/features/places/components/place-list-sheet";
+import { PlacePanel } from "@/features/places/components/place-panel";
 import { PlaceMapOverlay } from "@/features/places/components/place-map-overlay";
 import { MapControls } from "@/features/map/components/map-controls";
 import type { MapViewHandle } from "@/features/map/components/map-view";
@@ -41,7 +39,7 @@ export function MapHome() {
   const lastLocatedKeyRef = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
-  const [panelSnap, setPanelSnap] = useState<PlacePanelSnap>("compact");
+  const [sheetHeight, setSheetHeight] = useState(0);
   const [regionPlaces, setRegionPlaces] = useState<Place[]>(mockPlaces);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,7 +131,6 @@ export function MapHome() {
 
   function handleSelectPlace(placeId: string, source: "map" | "list" = "map") {
     setSelectedPlaceId(placeId);
-    setPanelSnap("compact");
     if (source === "list") {
       const place = findPlaceById(placeId);
       if (place) {
@@ -158,7 +155,7 @@ export function MapHome() {
 
   function clearSelection() {
     setSelectedPlaceId(null);
-    setPanelSnap("compact");
+    setSheetHeight(0);
   }
 
   function handleResearch() {
@@ -210,6 +207,11 @@ export function MapHome() {
   }
 
   const emptyState = getEmptyState();
+  const placeCountLabel = `${displayPlaces.length}곳 표시${
+    regionPlaces.length !== displayPlaces.length
+      ? ` · ${regionPlaces.length}곳 중`
+      : ""
+  } · 잠실·고척 Mock`;
 
   return (
     <div className="flex h-full w-full">
@@ -217,13 +219,7 @@ export function MapHome() {
         <div className="space-y-3 px-4 py-3">
           <div>
             <p className="text-sm font-medium">주변 관람 장소</p>
-            <p className="text-muted-foreground text-xs">
-              {displayPlaces.length}곳 표시
-              {regionPlaces.length !== displayPlaces.length
-                ? ` · ${regionPlaces.length}곳 중`
-                : ""}{" "}
-              · 잠실·고척 Mock
-            </p>
+            <p className="text-muted-foreground text-xs">{placeCountLabel}</p>
           </div>
           <MapHomeToolbar
             searchInput={searchInput}
@@ -275,19 +271,42 @@ export function MapHome() {
           onResearch={handleResearch}
           locateLoading={geoStatus === "loading"}
           researchDisabled={!mapReady}
-          hasBottomCard={!!selectedPlace && panelSnap === "compact"}
-          hasDetailPanel={!!selectedPlace && panelSnap === "expanded"}
+          sheetBottomOffset={sheetHeight > 0 ? sheetHeight : undefined}
         />
 
-        {selectedPlace && (
-          <PlaceMapOverlay
-            className={panelSnap === "expanded" ? "max-w-2xl" : "max-w-lg"}
-          >
+        {selectedPlace ? (
+          <div className="pointer-events-none absolute inset-y-3 left-3 z-20 hidden w-80 md:block lg:w-96">
+            <div className="pointer-events-auto h-full">
+              <PlacePanel
+                key={selectedPlace.id}
+                place={selectedPlace}
+                onClose={clearSelection}
+                variant="sidebar"
+              />
+            </div>
+          </div>
+        ) : null}
+
+        {!selectedPlace ? (
+          <PlaceMapOverlay className="md:hidden">
+            <PlaceListSheet
+              places={displayPlaces}
+              selectedPlaceId={selectedPlaceId}
+              onSelectPlace={handleSelectPlaceFromList}
+              emptyTitle={emptyState.title}
+              emptyDescription={emptyState.description}
+              placeCountLabel={placeCountLabel}
+              onHeightChange={setSheetHeight}
+            />
+          </PlaceMapOverlay>
+        ) : (
+          <PlaceMapOverlay className="md:hidden">
             <PlacePanel
               key={selectedPlace.id}
               place={selectedPlace}
               onClose={clearSelection}
-              onSnapChange={setPanelSnap}
+              variant="sheet"
+              onHeightChange={setSheetHeight}
             />
           </PlaceMapOverlay>
         )}

@@ -25,34 +25,52 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { X } from "lucide-react";
+import { SheetDragArea } from "@/features/places/components/bottom-sheet";
+import { ArrowLeft, X } from "lucide-react";
 
 type PlaceDetailProps = {
   place: Place;
   onClose?: () => void;
+  /** 모바일 시트에서 목록으로 돌아가는 뒤로가기 */
+  showBack?: boolean;
 };
 
-export function PlaceDetail({ place, onClose }: PlaceDetailProps) {
+export function PlaceDetail({ place, onClose, showBack = false }: PlaceDetailProps) {
   const galleryImages = getPlaceGalleryImages(place);
   const latest = getLatestReport(place);
   const sports = getPlaceSportIds(place);
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-start gap-2 px-4 py-3">
-        <div className="min-w-0 flex-1">
+      <div className="flex items-start gap-1 px-3 py-3 sm:px-4">
+        {onClose && showBack ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="목록으로"
+            className="mt-0.5 shrink-0"
+            onClick={onClose}
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <ArrowLeft />
+          </Button>
+        ) : null}
+        <SheetDragArea className="min-w-0 flex-1 px-1 py-0.5">
           <h2 className="font-heading text-base font-medium">{place.name}</h2>
           {place.categoryName && (
             <p className="text-muted-foreground text-xs">{place.categoryName}</p>
           )}
-        </div>
+        </SheetDragArea>
         {onClose && (
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
             aria-label="닫기"
+            className="mt-0.5 shrink-0"
             onClick={onClose}
+            onPointerDown={(event) => event.stopPropagation()}
           >
             <X />
           </Button>

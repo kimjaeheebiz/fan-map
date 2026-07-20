@@ -6,18 +6,16 @@ type PlaceMapOverlayProps = {
   className?: string;
 };
 
-/** 지도 영역 하단 중앙에 띄우는 공통 래퍼 */
+/** 지도 영역 하단에 띄우는 모바일 상세 시트 래퍼 */
 export function PlaceMapOverlay({ children, className }: PlaceMapOverlayProps) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center p-3 pb-4 md:p-4">
-      <div
-        className={cn(
-          "pointer-events-auto w-full transition-[max-width,opacity,transform] duration-300 ease-out",
-          className,
-        )}
-      >
-        {children}
-      </div>
+    <div
+      className={cn(
+        "pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center",
+        className,
+      )}
+    >
+      <div className="pointer-events-auto w-full max-w-lg">{children}</div>
     </div>
   );
 }

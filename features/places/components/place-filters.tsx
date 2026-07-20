@@ -28,7 +28,7 @@ export function PlaceFilters({ filters, onChange, className }: PlaceFiltersProps
 
   return (
     <div
-      className={cn("flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}
+      className={cn("flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}
       role="group"
       aria-label="장소 필터"
     >
