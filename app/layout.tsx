@@ -6,7 +6,8 @@ import { appConfig } from "@/config/app";
 
 export const metadata: Metadata = {
   title: appConfig.name,
-  description: "Reusable Next.js starter template",
+  description:
+    "스포츠 관람 장소를 지도에서 찾고, 실제 관람 경험을 공유하는 Fan Map",
 };
 
 export default function RootLayout({

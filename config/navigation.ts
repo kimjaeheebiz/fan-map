@@ -25,6 +25,8 @@ export type NavSection = {
 export const mainNav: NavSection[] = [
   {
     title: "개요",
+    // PoC: 지도 홈은 (map) 셸 사용. 샘플 페이지는 메뉴에서 숨김 (라우트·파일은 유지)
+    hidden: true,
     items: [
       { title: "홈", href: "/", icon: "home" },
       { title: "대시보드", href: "/dashboard", icon: "layout-dashboard" },
@@ -33,6 +35,7 @@ export const mainNav: NavSection[] = [
   },
   {
     title: "사용자",
+    hidden: true,
     items: [
       { title: "사용자 목록", href: "/users", icon: "users" },
       { title: "사용자 등록", href: "/users/new", icon: "user-plus" },
@@ -40,6 +43,7 @@ export const mainNav: NavSection[] = [
   },
   {
     title: "가이드",
+    // 개발 레퍼런스 — 삭제하지 않음. /guide/* 직접 접근 또는 이 메뉴로 이동
     items: [
       { title: "UI", href: "/guide/ui", icon: "palette" },
       { title: "패턴", href: "/guide/pattern", icon: "layers" },

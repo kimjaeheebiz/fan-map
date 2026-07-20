@@ -30,13 +30,13 @@ export type AppConfig = {
  * Theme Guide(/guide/theme)에서 런타임으로 오버라이드할 수 있다.
  */
 export const appConfig: AppConfig = {
-  name: "Web Starter",
+  name: "Fan Map",
   theme: "system",
   primaryColor: "zinc",
   radius: "sm",
   layout: "vertical",
   sidebar: "expanded",
   header: "fixed",
-  footer: true,
-  containerWidth: "lg",
+  footer: false,
+  containerWidth: "full",
 };

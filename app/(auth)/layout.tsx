@@ -9,12 +9,12 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className="mb-4 flex flex-col items-center gap-2 text-center">
         <Link href="/" className="flex items-center gap-2 font-semibold text-base">
           <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-md">
-            W
+            F
           </span>
           <span>{appConfig.name}</span>
         </Link>
         <p className="text-muted-foreground">
-          서비스 설명 문구
+          스포츠 관람 장소 지도
         </p>
       </div>
       <Card className="w-full max-w-md gap-0 py-0">
