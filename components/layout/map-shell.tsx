@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { appConfig } from "@/config/app";
-import { Input } from "@/components/ui/input";
 
 type MapShellProps = {
   children: ReactNode;
@@ -21,13 +20,6 @@ export function MapShell({ children }: MapShellProps) {
           </span>
           <span>{appConfig.name}</span>
         </Link>
-        <Input
-          type="search"
-          placeholder="장소·지역 검색 (Phase 5)"
-          disabled
-          className="ml-auto hidden max-w-md sm:flex"
-          aria-label="장소 검색"
-        />
       </header>
       <main className="relative min-h-0 flex-1">{children}</main>
     </div>

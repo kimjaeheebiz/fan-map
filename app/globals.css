@@ -175,3 +175,55 @@
     @apply font-sans;
   }
 }
+
+/* 지도 마커 — 크기·그림자는 CSS transition, 선택 바운스는 wrap에 적용 */
+:root {
+  --fan-map-marker-bounce: -4px;
+  --fan-map-marker-size: 24px;
+  --fan-map-marker-size-selected: 28px;
+  --fan-map-marker-primary: var(--primary, #1447e6);
+  --fan-map-marker-border: var(--background, #ffffff);
+}
+
+@keyframes fan-map-marker-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(var(--fan-map-marker-bounce));
+  }
+}
+
+.fan-map-marker-wrap {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+}
+
+.fan-map-marker-wrap--selected {
+  animation: fan-map-marker-bounce 1.4s ease-in-out infinite;
+}
+
+.fan-map-marker-dot {
+  width: var(--fan-map-marker-size);
+  height: var(--fan-map-marker-size);
+  border-radius: 9999px;
+  background: var(--fan-map-marker-primary);
+  border: 2px solid var(--fan-map-marker-border);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+  transition:
+    width 0.2s ease,
+    height 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.fan-map-marker-wrap--selected .fan-map-marker-dot {
+  width: var(--fan-map-marker-size-selected);
+  height: var(--fan-map-marker-size-selected);
+  box-shadow:
+    0 0 0 4px rgb(20 71 230 / 20%),
+    0 2px 6px rgb(0 0 0 / 25%);
+}

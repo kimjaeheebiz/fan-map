@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  getCoverImageUrl,
   getLatestReport,
+  getPlaceGalleryImages,
   getPlaceSportIds,
   getReportCount,
 } from "@/features/places/lib/place-helpers";
+import { PlaceImageGallery } from "@/features/places/components/place-image-gallery";
 import {
   getSportName,
   getTagLabel,
@@ -32,7 +33,7 @@ type PlaceDetailProps = {
 };
 
 export function PlaceDetail({ place, onClose }: PlaceDetailProps) {
-  const cover = getCoverImageUrl(place);
+  const galleryImages = getPlaceGalleryImages(place);
   const latest = getLatestReport(place);
   const sports = getPlaceSportIds(place);
 
@@ -62,17 +63,22 @@ export function PlaceDetail({ place, onClose }: PlaceDetailProps) {
 
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-4 p-4">
-          {cover && (
-            <div className="bg-muted aspect-video overflow-hidden rounded-xl">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cover} alt="" className="size-full object-cover" />
-            </div>
-          )}
+          <PlaceImageGallery images={galleryImages} />
 
           <div className="space-y-1 text-sm">
             <p>{place.address}</p>
             {place.phone && (
               <p className="text-muted-foreground">{place.phone}</p>
+            )}
+            {place.naverMapUrl && (
+              <a
+                href={place.naverMapUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary text-sm underline-offset-4 hover:underline"
+              >
+                네이버 지도에서 보기
+              </a>
             )}
             <p className="text-muted-foreground">
               관람 제보 {getReportCount(place)}건
@@ -136,17 +142,10 @@ export function PlaceDetail({ place, onClose }: PlaceDetailProps) {
                       </div>
                     )}
                     {report.images.length > 0 && (
-                      <div className="flex gap-2 overflow-x-auto">
-                        {report.images.map((src, index) => (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            key={`${report.id}-${index}`}
-                            src={src}
-                            alt=""
-                            className="h-20 w-28 shrink-0 rounded-md object-cover"
-                          />
-                        ))}
-                      </div>
+                      <PlaceImageGallery
+                        images={report.images}
+                        imageClassName="h-20 w-28 rounded-md"
+                      />
                     )}
                   </CardContent>
                 </Card>

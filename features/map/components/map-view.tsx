@@ -1,7 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { loadNaverMapsSdk } from "@/features/map/lib/load-naver-sdk";
+import {
+  createPlaceMarkerIcon,
+  syncMarkerSelection,
+} from "@/features/map/lib/marker-icon";
+import type { MapBounds } from "@/features/map/lib/map-bounds";
 import type { NaverMap, NaverMarker } from "@/features/map/types/naver";
 import type { Place } from "@/features/places/types";
 import { DEFAULT_MAP_CENTER } from "@/features/places/data/mock-places";
@@ -9,132 +20,165 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
+export type MapViewHandle = {
+  panTo: (lat: number, lng: number, zoom?: number) => void;
+  getBounds: () => MapBounds | null;
+};
+
 type MapViewProps = {
   places: Place[];
   selectedPlaceId: string | null;
-  onSelectPlace: (placeId: string) => void;
+  onSelectPlace: (placeId: string, source: "map") => void;
+  onMapReady?: () => void;
   className?: string;
 };
 
-export function MapView({
-  places,
-  selectedPlaceId,
-  onSelectPlace,
-  className,
-}: MapViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<NaverMap | null>(null);
-  const markersRef = useRef<Map<string, NaverMarker>>(new Map());
-  const onSelectRef = useRef(onSelectPlace);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+export const MapView = forwardRef<MapViewHandle, MapViewProps>(
+  function MapView(
+    { places, selectedPlaceId, onSelectPlace, onMapReady, className },
+    ref,
+  ) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<NaverMap | null>(null);
+    const markersRef = useRef<Map<string, NaverMarker>>(new Map());
+    const onSelectRef = useRef(onSelectPlace);
+    const onMapReadyRef = useRef(onMapReady);
+    const [status, setStatus] = useState<"loading" | "ready" | "error">(
+      "loading",
+    );
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    onSelectRef.current = onSelectPlace;
-  }, [onSelectPlace]);
+    useEffect(() => {
+      onSelectRef.current = onSelectPlace;
+    }, [onSelectPlace]);
 
-  useEffect(() => {
-    let cancelled = false;
+    useEffect(() => {
+      onMapReadyRef.current = onMapReady;
+    }, [onMapReady]);
 
-    async function init() {
-      try {
-        await loadNaverMapsSdk();
-        if (cancelled || !containerRef.current || !window.naver?.maps) return;
-
+    useImperativeHandle(ref, () => ({
+      panTo(lat, lng, zoom) {
+        if (!mapRef.current || !window.naver?.maps) return;
         const { maps } = window.naver;
-        const center = new maps.LatLng(
-          DEFAULT_MAP_CENTER.lat,
-          DEFAULT_MAP_CENTER.lng,
-        );
-        const map = new maps.Map(containerRef.current, {
-          center,
-          zoom: DEFAULT_MAP_CENTER.zoom,
-        });
-        mapRef.current = map;
-        setStatus("ready");
-      } catch (error) {
-        if (cancelled) return;
-        setStatus("error");
-        setErrorMessage(
-          error instanceof Error ? error.message : "지도를 불러오지 못했습니다.",
-        );
-      }
-    }
+        mapRef.current.setCenter(new maps.LatLng(lat, lng));
+        if (typeof zoom === "number") {
+          mapRef.current.setZoom(zoom);
+        }
+      },
+      getBounds() {
+        if (!mapRef.current) return null;
+        const bounds = mapRef.current.getBounds();
+        const sw = bounds.getSW();
+        const ne = bounds.getNE();
+        return {
+          minLat: sw.lat(),
+          minLng: sw.lng(),
+          maxLat: ne.lat(),
+          maxLng: ne.lng(),
+        };
+      },
+    }));
 
-    void init();
+    useEffect(() => {
+      let cancelled = false;
 
-    return () => {
-      cancelled = true;
-      markersRef.current.forEach((marker) => marker.setMap(null));
-      markersRef.current.clear();
-      mapRef.current?.destroy?.();
-      mapRef.current = null;
-    };
-  }, []);
+      async function init() {
+        try {
+          await loadNaverMapsSdk();
+          if (cancelled || !containerRef.current || !window.naver?.maps) return;
 
-  useEffect(() => {
-    if (status !== "ready" || !mapRef.current || !window.naver?.maps) return;
-
-    const { maps } = window.naver;
-    const map = mapRef.current;
-    const nextIds = new Set(places.map((p) => p.id));
-
-    markersRef.current.forEach((marker, id) => {
-      if (!nextIds.has(id)) {
-        marker.setMap(null);
-        markersRef.current.delete(id);
-      }
-    });
-
-    for (const place of places) {
-      const position = new maps.LatLng(place.lat, place.lng);
-      let marker = markersRef.current.get(place.id);
-
-      if (!marker) {
-        marker = new maps.Marker({
-          map,
-          position,
-          title: place.name,
-        });
-        maps.Event.addListener(marker, "click", () => {
-          onSelectRef.current(place.id);
-        });
-        markersRef.current.set(place.id, marker);
-      } else {
-        marker.setPosition(position);
-        marker.setMap(map);
+          const { maps } = window.naver;
+          const center = new maps.LatLng(
+            DEFAULT_MAP_CENTER.lat,
+            DEFAULT_MAP_CENTER.lng,
+          );
+          const map = new maps.Map(containerRef.current, {
+            center,
+            zoom: DEFAULT_MAP_CENTER.zoom,
+          });
+          mapRef.current = map;
+          setStatus("ready");
+          onMapReadyRef.current?.();
+        } catch (error) {
+          if (cancelled) return;
+          setStatus("error");
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "지도를 불러오지 못했습니다.",
+          );
+        }
       }
 
-      marker.setZIndex(place.id === selectedPlaceId ? 10 : 1);
-    }
-  }, [places, selectedPlaceId, status]);
+      void init();
 
-  useEffect(() => {
-    if (status !== "ready" || !mapRef.current || !window.naver?.maps) return;
-    if (!selectedPlaceId) return;
+      return () => {
+        cancelled = true;
+        markersRef.current.forEach((marker) => marker.setMap(null));
+        markersRef.current.clear();
+        mapRef.current?.destroy?.();
+        mapRef.current = null;
+      };
+    }, []);
 
-    const place = places.find((p) => p.id === selectedPlaceId);
-    if (!place) return;
+    useEffect(() => {
+      if (status !== "ready" || !mapRef.current || !window.naver?.maps) return;
 
-    const { maps } = window.naver;
-    mapRef.current.setCenter(new maps.LatLng(place.lat, place.lng));
-  }, [selectedPlaceId, places, status]);
+      const { maps } = window.naver;
+      const map = mapRef.current;
+      const nextIds = new Set(places.map((p) => p.id));
 
-  return (
-    <div className={cn("relative h-full w-full", className)}>
-      <div ref={containerRef} className="h-full w-full" />
-      {status === "loading" && (
-        <Skeleton className="absolute inset-0 rounded-none" />
-      )}
-      {status === "error" && (
-        <div className="bg-background absolute inset-0 flex items-center justify-center p-6">
-          <EmptyState
-            title="지도를 표시할 수 없습니다."
-            description={errorMessage ?? undefined}
-            className="border-0"
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+      markersRef.current.forEach((marker, id) => {
+        if (!nextIds.has(id)) {
+          marker.setMap(null);
+          markersRef.current.delete(id);
+        }
+      });
+
+      for (const place of places) {
+        const position = new maps.LatLng(place.lat, place.lng);
+        const selected = place.id === selectedPlaceId;
+        const icon = createPlaceMarkerIcon(maps, place.id);
+        let marker = markersRef.current.get(place.id);
+
+        if (!marker) {
+          marker = new maps.Marker({
+            map,
+            position,
+            title: place.name,
+            icon,
+            zIndex: selected ? 10 : 1,
+          });
+          maps.Event.addListener(marker, "click", () => {
+            onSelectRef.current(place.id, "map");
+          });
+          markersRef.current.set(place.id, marker);
+        } else {
+          marker.setPosition(position);
+          marker.setMap(map);
+          marker.setZIndex(selected ? 10 : 1);
+        }
+      }
+
+      syncMarkerSelection(containerRef.current, selectedPlaceId);
+    }, [places, selectedPlaceId, status]);
+
+    return (
+      <div className={cn("relative h-full w-full", className)}>
+        <div ref={containerRef} className="h-full w-full" />
+        {status === "loading" && (
+          <Skeleton className="absolute inset-0 rounded-none" />
+        )}
+        {status === "error" && (
+          <div className="bg-background absolute inset-0 flex items-center justify-center p-6">
+            <EmptyState
+              title="지도를 표시할 수 없습니다."
+              description={errorMessage ?? undefined}
+              className="border-0"
+            />
+          </div>
+        )}
+      </div>
+    );
+  },
+);
