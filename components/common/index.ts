@@ -1,3 +1,4 @@
+export { HorizontalScroll } from "@/components/common/horizontal-scroll";
 export { PageHeader } from "@/components/common/page-header";
 export { PageMetaHeader } from "@/components/common/page-meta-header";
 export { PageCard } from "@/components/common/page-card";

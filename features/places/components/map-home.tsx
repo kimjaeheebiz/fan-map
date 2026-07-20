@@ -3,24 +3,27 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { mockPlaces } from "@/features/places/data/mock-places";
 import { MapHomeToolbar } from "@/features/places/components/map-home-toolbar";
 import { PlaceList } from "@/features/places/components/place-list";
 import { PlaceListSheet } from "@/features/places/components/place-list-sheet";
 import { PlacePanel } from "@/features/places/components/place-panel";
 import { PlaceMapOverlay } from "@/features/places/components/place-map-overlay";
+import { ReportDialog } from "@/features/places/components/report-dialog";
 import { MapControls } from "@/features/map/components/map-controls";
 import type { MapViewHandle } from "@/features/map/components/map-view";
 import { useGeolocation } from "@/features/map/hooks/use-geolocation";
 import { useFavoritePlaceIds } from "@/features/places/hooks/use-favorite-place-ids";
-import { isPointInBounds, areAnyPlacesInBounds } from "@/features/map/lib/map-bounds";
+import { usePlaces } from "@/features/places/hooks/use-places";
+import { isPointInBounds, areAnyPlacesInBounds, type MapBounds } from "@/features/map/lib/map-bounds";
 import {
   defaultPlaceFilters,
   filterPlaces,
   hasActivePlaceFilters,
 } from "@/features/places/lib/place-filters";
 import type { Place } from "@/features/places/types";
+import { useMapShellReportAction } from "@/components/layout/map-shell";
 import { EmptyState } from "@/components/common/empty-state";
+import { Loading } from "@/components/common/loading";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,13 +43,24 @@ export function MapHome() {
   const [mapReady, setMapReady] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [sheetHeight, setSheetHeight] = useState(0);
-  const [regionPlaces, setRegionPlaces] = useState<Place[]>(mockPlaces);
+  /** null이면 전체 표시, 값이 있으면 ‘이 지역 재검색’ 영역만 */
+  const [regionBounds, setRegionBounds] = useState<MapBounds | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState(defaultPlaceFilters);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportPlace, setReportPlace] = useState<Place | null>(null);
+  const { data: allPlaces = [], isLoading: placesLoading } = usePlaces();
   const { favoritePlaceIds } = useFavoritePlaceIds();
   const { status: geoStatus, requestLocation, position, errorMessage } =
     useGeolocation();
+
+  const regionPlaces = useMemo(() => {
+    if (!regionBounds) return allPlaces;
+    return allPlaces.filter((place) =>
+      isPointInBounds(place.lat, place.lng, regionBounds),
+    );
+  }, [allPlaces, regionBounds]);
 
   const displayPlaces = useMemo(
     () =>
@@ -63,7 +77,7 @@ export function MapHome() {
   const selectedPlace =
     displayPlaces.find((place) => place.id === selectedPlaceId) ??
     regionPlaces.find((place) => place.id === selectedPlaceId) ??
-    mockPlaces.find((place) => place.id === selectedPlaceId) ??
+    allPlaces.find((place) => place.id === selectedPlaceId) ??
     null;
 
   useEffect(() => {
@@ -124,7 +138,7 @@ export function MapHome() {
     return (
       displayPlaces.find((place) => place.id === placeId) ??
       regionPlaces.find((place) => place.id === placeId) ??
-      mockPlaces.find((place) => place.id === placeId) ??
+      allPlaces.find((place) => place.id === placeId) ??
       null
     );
   }
@@ -165,10 +179,10 @@ export function MapHome() {
       return;
     }
 
-    const next = mockPlaces.filter((place) =>
+    const next = allPlaces.filter((place) =>
       isPointInBounds(place.lat, place.lng, bounds),
     );
-    setRegionPlaces(next);
+    setRegionBounds(bounds);
 
     if (selectedPlaceId && !next.some((place) => place.id === selectedPlaceId)) {
       clearSelection();
@@ -206,12 +220,30 @@ export function MapHome() {
     };
   }
 
+  function openReportDialog(place?: Place | null) {
+    setReportPlace(place ?? null);
+    setReportOpen(true);
+  }
+
+  useMapShellReportAction(() => openReportDialog());
+
+  function handleReportSubmitted(place: Place) {
+    // 제보한 장소가 보이도록 영역 필터를 해제하고 해당 위치로 이동
+    setRegionBounds(null);
+    setSelectedPlaceId(place.id);
+    mapRef.current?.panTo(place.lat, place.lng);
+  }
+
   const emptyState = getEmptyState();
   const placeCountLabel = `${displayPlaces.length}곳 표시${
     regionPlaces.length !== displayPlaces.length
       ? ` · ${regionPlaces.length}곳 중`
       : ""
-  } · 잠실·고척 Mock`;
+  }`;
+
+  if (placesLoading) {
+    return <Loading label="장소 불러오는 중..." className="h-full" />;
+  }
 
   return (
     <div className="flex h-full w-full">
@@ -252,6 +284,7 @@ export function MapHome() {
           ref={mapRef}
           places={displayPlaces}
           selectedPlaceId={selectedPlaceId}
+          favoritePlaceIds={favoritePlaceIds}
           onSelectPlace={handleSelectPlaceFromMap}
           onMapReady={() => setMapReady(true)}
         />
@@ -276,11 +309,12 @@ export function MapHome() {
 
         {selectedPlace ? (
           <div className="pointer-events-none absolute inset-y-3 left-3 z-20 hidden w-80 md:block lg:w-96">
-            <div className="pointer-events-auto h-full">
+            <div className="pointer-events-auto h-full min-h-0">
               <PlacePanel
                 key={selectedPlace.id}
                 place={selectedPlace}
                 onClose={clearSelection}
+                onReport={() => openReportDialog(selectedPlace)}
                 variant="sidebar"
               />
             </div>
@@ -305,11 +339,19 @@ export function MapHome() {
               key={selectedPlace.id}
               place={selectedPlace}
               onClose={clearSelection}
+              onReport={() => openReportDialog(selectedPlace)}
               variant="sheet"
               onHeightChange={setSheetHeight}
             />
           </PlaceMapOverlay>
         )}
+
+        <ReportDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          initialPlace={reportPlace}
+          onSubmitted={handleReportSubmitted}
+        />
       </div>
     </div>
   );

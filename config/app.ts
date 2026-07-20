@@ -32,7 +32,7 @@ export type AppConfig = {
 export const appConfig: AppConfig = {
   name: "Fan Map",
   theme: "system",
-  primaryColor: "blue",
+  primaryColor: "rose",
   radius: "sm",
   layout: "vertical",
   sidebar: "expanded",

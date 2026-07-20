@@ -78,8 +78,8 @@
   --card-foreground: #0a0a0a;
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
-  --primary: #1447e6;
-  --primary-foreground: #eff6ff;
+  --primary: #f11650;
+  --primary-foreground: #fff5f7;
   --secondary: #f4f4f5;
   --secondary-foreground: #18181b;
   --muted: #f5f5f5;
@@ -100,16 +100,16 @@
   --border: #e5e5e5;
   --input: #e5e5e5;
   --ring: #a1a1a1;
-  --chart-1: #8ec5ff;
-  --chart-2: #2b7fff;
-  --chart-3: #155dfc;
-  --chart-4: #1447e6;
-  --chart-5: #193cb8;
+  --chart-1: #ffb8cb;
+  --chart-2: #ff6b8a;
+  --chart-3: #ff3d6d;
+  --chart-4: #f11650;
+  --chart-5: #b8123e;
   --radius: 0.45rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #0a0a0a;
-  --sidebar-primary: #155dfc;
-  --sidebar-primary-foreground: #eff6ff;
+  --sidebar-primary: #f11650;
+  --sidebar-primary-foreground: #fff5f7;
   --sidebar-accent: #f5f5f5;
   --sidebar-accent-foreground: #171717;
   --sidebar-border: #e5e5e5;
@@ -127,8 +127,8 @@
   --card-foreground: #fafafa;
   --popover: #171717;
   --popover-foreground: #fafafa;
-  --primary: #193cb8;
-  --primary-foreground: #eff6ff;
+  --primary: #ff4d78;
+  --primary-foreground: #2c0610;
   --secondary: #27272a;
   --secondary-foreground: #fafafa;
   --muted: #262626;
@@ -149,15 +149,15 @@
   --border: #ffffff1a;
   --input: #ffffff26;
   --ring: #737373;
-  --chart-1: #8ec5ff;
-  --chart-2: #2b7fff;
-  --chart-3: #155dfc;
-  --chart-4: #1447e6;
-  --chart-5: #193cb8;
+  --chart-1: #ffc2d1;
+  --chart-2: #ff7a97;
+  --chart-3: #ff4d78;
+  --chart-4: #f11650;
+  --chart-5: #c41240;
   --sidebar: #171717;
   --sidebar-foreground: #fafafa;
-  --sidebar-primary: #2b7fff;
-  --sidebar-primary-foreground: #eff6ff;
+  --sidebar-primary: #ff4d78;
+  --sidebar-primary-foreground: #2c0610;
   --sidebar-accent: #262626;
   --sidebar-accent-foreground: #fafafa;
   --sidebar-border: #ffffff1a;
@@ -174,15 +174,23 @@
   html {
     @apply font-sans;
   }
+  table,
+  input,
+  textarea,
+  button,
+  select {
+    @apply text-sm;
+  }
 }
 
-/* 지도 마커 — 크기·그림자는 CSS transition, 선택 바운스는 wrap에 적용 */
+/* 지도 마커 — 기본 info / 즐겨찾기 primary */
 :root {
   --fan-map-marker-bounce: -4px;
   --fan-map-marker-size: 24px;
   --fan-map-marker-size-selected: 28px;
-  --fan-map-marker-primary: var(--primary, #1447e6);
-  --fan-map-marker-border: var(--background, #ffffff);
+  --fan-map-marker-default: var(--info);
+  --fan-map-marker-favorite: var(--primary);
+  --fan-map-marker-border: var(--background);
 }
 
 @keyframes fan-map-marker-bounce {
@@ -211,19 +219,30 @@
   width: var(--fan-map-marker-size);
   height: var(--fan-map-marker-size);
   border-radius: 9999px;
-  background: var(--fan-map-marker-primary);
+  background: var(--fan-map-marker-default);
   border: 2px solid var(--fan-map-marker-border);
   box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
   transition:
     width 0.2s ease,
     height 0.2s ease,
+    background-color 0.2s ease,
     box-shadow 0.2s ease;
+}
+
+.fan-map-marker-wrap--favorite .fan-map-marker-dot {
+  background: var(--fan-map-marker-favorite);
 }
 
 .fan-map-marker-wrap--selected .fan-map-marker-dot {
   width: var(--fan-map-marker-size-selected);
   height: var(--fan-map-marker-size-selected);
   box-shadow:
-    0 0 0 4px rgb(20 71 230 / 20%),
+    0 0 0 4px color-mix(in oklch, var(--fan-map-marker-default) 22%, transparent),
+    0 2px 6px rgb(0 0 0 / 25%);
+}
+
+.fan-map-marker-wrap--favorite.fan-map-marker-wrap--selected .fan-map-marker-dot {
+  box-shadow:
+    0 0 0 4px color-mix(in oklch, var(--fan-map-marker-favorite) 22%, transparent),
     0 2px 6px rgb(0 0 0 / 25%);
 }

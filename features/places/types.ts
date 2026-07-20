@@ -1,10 +1,16 @@
 import type { SportId } from "@/features/catalog/types";
 
+/** 종목 1개 + 그 종목의 팀들 (세트) */
+export type SportTeamSet = {
+  sportId: SportId;
+  teamIds?: string[];
+};
+
 export type ViewingReport = {
   id: string;
   placeId: string;
-  sportId: SportId;
-  teamId?: string;
+  /** 종목·팀 세트 (1개 이상). 종목별로 팀을 묶음 */
+  sportTeams: SportTeamSet[];
   watchedAt: string;
   review: string;
   tagIds?: string[];

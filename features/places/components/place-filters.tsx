@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import { sports } from "@/features/catalog/constants";
 import type { SportId } from "@/features/catalog/types";
 import type { PlaceFilterState } from "@/features/places/lib/place-filters";
+import { HorizontalScroll } from "@/components/common/horizontal-scroll";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 type PlaceFiltersProps = {
   filters: PlaceFilterState;
@@ -27,16 +27,22 @@ export function PlaceFilters({ filters, onChange, className }: PlaceFiltersProps
   }
 
   return (
-    <div
-      className={cn("flex gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}
-      role="group"
-      aria-label="장소 필터"
+    <HorizontalScroll
+      className={className}
+      contentClassName="gap-1 pb-0.5"
+      scrollRatio={0.55}
     >
       <FilterChip
         pressed={filters.sportId === null}
         onClick={() => setSportId(null)}
       >
         전체
+      </FilterChip>
+      <FilterChip
+        pressed={filters.favoritesOnly}
+        onClick={toggleFavoritesOnly}
+      >
+        즐겨찾기
       </FilterChip>
       {sports.map((sport) => (
         <FilterChip
@@ -49,13 +55,13 @@ export function PlaceFilters({ filters, onChange, className }: PlaceFiltersProps
           {sport.name}
         </FilterChip>
       ))}
-      <FilterChip pressed={filters.recentReportOnly} onClick={toggleRecentReportOnly}>
+      <FilterChip
+        pressed={filters.recentReportOnly}
+        onClick={toggleRecentReportOnly}
+      >
         최근 제보
       </FilterChip>
-      <FilterChip pressed={filters.favoritesOnly} onClick={toggleFavoritesOnly}>
-        즐겨찾기
-      </FilterChip>
-    </div>
+    </HorizontalScroll>
   );
 }
 

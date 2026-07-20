@@ -26,13 +26,19 @@ function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
 
 function DialogOverlay({
   className,
+  blur = true,
   ...props
-}: DialogPrimitive.Backdrop.Props) {
+}: DialogPrimitive.Backdrop.Props & {
+  /** 배경 블러. 공통 기본값: blur-sm */
+  blur?: boolean
+}) {
   return (
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
+      data-blur={blur ? "" : undefined}
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/30 duration-100 supports-backdrop-filter:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 bg-black/30 duration-100 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        blur && "supports-backdrop-filter:backdrop-blur-sm",
         className
       )}
       {...props}
@@ -58,34 +64,212 @@ const dialogContentVariants = cva(
         /** 전체 (좌우 1rem 여백만 유지) */
         full: "sm:max-w-[calc(100%-2rem)]",
       },
+      layout: {
+        /** Confirm/Alert · 가이드용 기본 그리드 */
+        default: "",
+        /** 헤더 고정 + 본문 스크롤 */
+        scroll:
+          "flex max-h-[min(90dvh,720px)] flex-col gap-0 overflow-hidden p-0",
+      },
     },
     defaultVariants: {
       size: "sm",
+      layout: "default",
     },
   }
 )
+
+/** 본문 스크롤 영역 — 얇은 둥근 스크롤바 */
+const dialogBodyScrollClassName = cn(
+  "h-0 min-h-0 flex-1 overflow-y-auto overscroll-contain",
+  "rounded-b-[inherit]",
+  "[scrollbar-width:thin]",
+  "[scrollbar-color:var(--color-border)_transparent]",
+  "[&::-webkit-scrollbar]:w-2",
+  "[&::-webkit-scrollbar-track]:bg-transparent",
+  "[&::-webkit-scrollbar-thumb]:rounded-full",
+  "[&::-webkit-scrollbar-thumb]:bg-border",
+  "[&::-webkit-scrollbar-thumb]:border-2",
+  "[&::-webkit-scrollbar-thumb]:border-transparent",
+  "[&::-webkit-scrollbar-thumb]:bg-clip-padding"
+)
+
+type DialogIconButtonProps = React.ComponentProps<typeof Button> & {
+  label: string
+}
+
+/** 헤더 우측 액션·닫기 공통 아이콘 버튼 (즐겨찾기·공유 등과 동일 모양) */
+function DialogIconButton({
+  label,
+  className,
+  children,
+  ...props
+}: DialogIconButtonProps) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-sm"
+      aria-label={label}
+      className={cn("bg-secondary shrink-0", className)}
+      {...props}
+    >
+      {children}
+    </Button>
+  )
+}
+
+/** 헤더 액션 영역의 닫기 버튼 (DialogClose 프리미티브와 구분) */
+function DialogHeaderCloseButton({
+  onClick,
+  className,
+  ...props
+}: Omit<DialogIconButtonProps, "label" | "children">) {
+  return (
+    <DialogIconButton
+      label="닫기"
+      onClick={onClick}
+      className={className}
+      {...props}
+    >
+      <XIcon />
+    </DialogIconButton>
+  )
+}
+
+type DialogScrollLayoutProps = {
+  title: React.ReactNode
+  description?: React.ReactNode
+  /** 닫기 왼쪽 — 즐겨찾기·공유 등 */
+  headerActions?: React.ReactNode
+  showCloseButton?: boolean
+  onClose?: () => void
+  /**
+   * 드래그 핸들 바.
+   * 장소 상세를 Dialog로 띄울 때만 true.
+   * BottomSheet가 핸들을 그리면 false.
+   */
+  showDragHandle?: boolean
+  children: React.ReactNode
+  footer?: React.ReactNode
+  className?: string
+  bodyClassName?: string
+  headerClassName?: string
+}
+
+/**
+ * 헤더 고정 + 본문 스크롤 레이아웃.
+ * DialogContent layout="scroll" 또는 사이드 패널에서 사용.
+ */
+function DialogScrollLayout({
+  title,
+  description,
+  headerActions,
+  showCloseButton = true,
+  onClose,
+  showDragHandle = false,
+  children,
+  footer,
+  className,
+  bodyClassName,
+  headerClassName,
+}: DialogScrollLayoutProps) {
+  return (
+    <div
+      className={cn("flex h-full min-h-0 flex-col overflow-hidden", className)}
+    >
+      {showDragHandle ? (
+        <div
+          className="flex h-5 shrink-0 items-center justify-center"
+          aria-hidden="true"
+        >
+          <span className="bg-muted h-1 w-10 rounded-full" />
+        </div>
+      ) : null}
+
+      <header
+        className={cn(
+          "flex shrink-0 items-start gap-3 border-b px-4 py-3 sm:px-6 sm:pt-5 sm:pb-4",
+          headerClassName
+        )}
+      >
+        <div className="min-w-0 flex-1">
+          {typeof title === "string" ? (
+            <div className="font-heading text-base leading-none font-medium">
+              {title}
+            </div>
+          ) : (
+            title
+          )}
+          {description ? (
+            typeof description === "string" ? (
+              <p className="text-muted-foreground mt-1.5 text-sm text-balance">
+                {description}
+              </p>
+            ) : (
+              description
+            )
+          ) : null}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1 pt-0.5">
+          {headerActions}
+          {showCloseButton && onClose ? (
+            <DialogHeaderCloseButton
+              onClick={onClose}
+              onPointerDown={(event) => event.stopPropagation()}
+            />
+          ) : null}
+        </div>
+      </header>
+
+      <div
+        className={cn(
+          dialogBodyScrollClassName,
+          "px-4 py-4 sm:px-6 sm:py-5",
+          bodyClassName
+        )}
+      >
+        {children}
+      </div>
+
+      {footer ? (
+        <footer className="flex shrink-0 flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
+          {footer}
+        </footer>
+      ) : null}
+    </div>
+  )
+}
 
 function DialogContent({
   className,
   children,
   showCloseButton = true,
   size = "md",
+  layout = "default",
+  blur = true,
   ...props
 }: DialogPrimitive.Popup.Props &
   VariantProps<typeof dialogContentVariants> & {
     showCloseButton?: boolean
+    /** 배경 오버레이 블러 */
+    blur?: boolean
   }) {
+  const isScroll = layout === "scroll"
+
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay blur={blur} />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         data-size={size}
-        className={cn(dialogContentVariants({ size }), className)}
+        data-layout={layout ?? "default"}
+        className={cn(dialogContentVariants({ size, layout }), className)}
         {...props}
       >
         {children}
-        {showCloseButton && (
+        {showCloseButton && !isScroll && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
             render={
@@ -178,9 +362,13 @@ export {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogHeaderCloseButton,
+  DialogIconButton,
   DialogOverlay,
   DialogPortal,
+  DialogScrollLayout,
   DialogTitle,
   DialogTrigger,
+  dialogBodyScrollClassName,
   dialogContentVariants,
 }

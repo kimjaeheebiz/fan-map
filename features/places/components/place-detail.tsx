@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   getLatestReport,
   getPlaceGalleryImages,
@@ -13,6 +14,11 @@ import {
   getTeamName,
 } from "@/features/catalog/constants";
 import type { Place } from "@/features/places/types";
+import {
+  DialogHeaderCloseButton,
+  DialogIconButton,
+  dialogBodyScrollClassName,
+} from "@/components/ui/dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,74 +29,114 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { SheetDragArea } from "@/features/places/components/bottom-sheet";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, PenLine, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useFavoritePlaceIds } from "@/features/places/hooks/use-favorite-place-ids";
+import { buildNaverMapSearchUrl } from "@/features/places/lib/naver-local-search";
+import { toast } from "sonner";
 
 type PlaceDetailProps = {
   place: Place;
   onClose?: () => void;
+  onReport?: () => void;
+  /** 닫기 왼쪽 — 즐겨찾기·공유 등 */
+  headerActions?: ReactNode;
   /** 모바일 시트에서 목록으로 돌아가는 뒤로가기 */
   showBack?: boolean;
+  /**
+   * 드래그 핸들 바.
+   * BottomSheet가 이미 핸들을 그리므로 시트에서는 false.
+   * Dialog로 띄울 때만 true.
+   */
+  showDragHandle?: boolean;
 };
 
-export function PlaceDetail({ place, onClose, showBack = false }: PlaceDetailProps) {
+export function PlaceDetail({
+  place,
+  onClose,
+  onReport,
+  headerActions,
+  showBack = false,
+  showDragHandle = false,
+}: PlaceDetailProps) {
   const galleryImages = getPlaceGalleryImages(place);
   const latest = getLatestReport(place);
   const sports = getPlaceSportIds(place);
+  const { isFavorite, toggleFavorite } = useFavoritePlaceIds();
+  const favorited = isFavorite(place.id);
+  const naverMapUrl = buildNaverMapSearchUrl(place.name, place.address);
+
+  function handleToggleFavorite() {
+    const next = toggleFavorite(place.id);
+    toast.success(
+      next ? "즐겨찾기에 추가했습니다." : "즐겨찾기를 해제했습니다.",
+    );
+  }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-start gap-1 px-3 py-3 sm:px-4">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      {showDragHandle ? <SheetDragArea asHandle /> : null}
+
+      <header className="flex shrink-0 items-start gap-2 border-b px-3 py-3 sm:px-4">
         {onClose && showBack ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="목록으로"
-            className="mt-0.5 shrink-0"
+          <DialogIconButton
+            label="목록으로"
+            className="mt-0.5"
             onClick={onClose}
             onPointerDown={(event) => event.stopPropagation()}
           >
             <ArrowLeft />
-          </Button>
+          </DialogIconButton>
         ) : null}
-        <SheetDragArea className="min-w-0 flex-1 px-1 py-0.5">
-          <h2 className="font-heading text-base font-medium">{place.name}</h2>
-          {place.categoryName && (
-            <p className="text-muted-foreground text-xs">{place.categoryName}</p>
-          )}
+
+        <SheetDragArea className="min-w-0 flex-1">
+          <h2 className="font-heading text-base leading-none font-medium">
+            {place.name}
+          </h2>
+          {place.categoryName ? (
+            <p className="text-muted-foreground mt-1.5 text-xs">
+              {place.categoryName}
+            </p>
+          ) : null}
         </SheetDragArea>
-        {onClose && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="닫기"
-            className="mt-0.5 shrink-0"
-            onClick={onClose}
+
+        <div className="flex shrink-0 items-center gap-1 pt-0.5">
+          {headerActions}
+          <DialogIconButton
+            label={favorited ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+            onClick={handleToggleFavorite}
             onPointerDown={(event) => event.stopPropagation()}
           >
-            <X />
-          </Button>
-        )}
-      </div>
+            <Star
+              className={cn(
+                "size-4",
+                favorited && "fill-primary text-primary",
+              )}
+            />
+          </DialogIconButton>
+          {onClose ? (
+            <DialogHeaderCloseButton
+              onClick={onClose}
+              onPointerDown={(event) => event.stopPropagation()}
+            />
+          ) : null}
+        </div>
+      </header>
 
-      <Separator />
-
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="flex flex-col gap-4 p-4">
+      <div className={cn(dialogBodyScrollClassName, "min-w-0")}>
+        <div className="flex flex-col gap-4 px-4 py-4">
           <PlaceImageGallery images={galleryImages} />
 
-          <div className="space-y-1 text-sm">
-            <p>{place.address}</p>
+          <div className="min-w-0 space-y-1 text-sm">
+            <p className="break-words">{place.address}</p>
             {place.phone && (
               <p className="text-muted-foreground">{place.phone}</p>
             )}
-            {place.naverMapUrl && (
+            {naverMapUrl && (
               <a
-                href={place.naverMapUrl}
+                href={naverMapUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="text-primary text-sm underline-offset-4 hover:underline"
@@ -105,23 +151,30 @@ export function PlaceDetail({ place, onClose, showBack = false }: PlaceDetailPro
           </div>
 
           {sports.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1">
               {sports.map((id) => (
-                <Badge key={id} variant="secondary">
+                <Badge key={id} variant="outline">
                   {getSportName(id)}
                 </Badge>
               ))}
             </div>
           )}
 
-          <p className="text-muted-foreground text-xs leading-relaxed">
+          <p className="text-muted-foreground text-xs">
             관람 가능 여부는 방문 전 매장에 확인해 주세요. 경기별 상영 여부는
             달라질 수 있어요.
           </p>
 
+          {onReport && (
+            <Button type="button" className="w-full" onClick={onReport}>
+              <PenLine data-icon="inline-start" />
+              이 장소에 관람 제보하기
+            </Button>
+          )}
+
           <Separator />
 
-          <section className="space-y-3">
+          <section className="min-w-0 space-y-3">
             <h3 className="text-sm font-medium">최근 관람 제보</h3>
             {place.reports.length === 0 ? (
               <EmptyState
@@ -131,25 +184,42 @@ export function PlaceDetail({ place, onClose, showBack = false }: PlaceDetailPro
               />
             ) : (
               place.reports.map((report) => (
-                <Card key={report.id} size="sm" className="shadow-none">
+                <Card
+                  key={report.id}
+                  size="sm"
+                  className="min-w-0 overflow-hidden shadow-none"
+                >
                   <CardHeader className="border-b">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="outline">
-                        {getSportName(report.sportId)}
-                      </Badge>
-                      {report.teamId && (
-                        <CardDescription>
-                          {getTeamName(report.teamId)}
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                          {(report.sportTeams ?? []).map((set) => (
+                            <div
+                              key={set.sportId}
+                              className="flex flex-wrap items-center gap-1"
+                            >
+                              <Badge variant="outline">
+                                {getSportName(set.sportId)}
+                              </Badge>
+                              {(set.teamIds ?? []).map((teamId) => (
+                                <Badge key={teamId} variant="secondary">
+                                  {getTeamName(teamId)}
+                                </Badge>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                        <CardDescription className="shrink-0 text-xs">
+                          {report.watchedAt}
                         </CardDescription>
-                      )}
-                      <CardDescription className="ml-auto">
-                        {report.watchedAt}
-                      </CardDescription>
+                      </div>
                     </div>
                     <CardTitle className="sr-only">관람 제보</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
-                    <p className="leading-relaxed">{report.review}</p>
+                  <CardContent className="min-w-0 space-y-2">
+                    <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                      {report.review}
+                    </p>
                     {report.tagIds && report.tagIds.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {report.tagIds.map((tagId) => (
@@ -171,7 +241,7 @@ export function PlaceDetail({ place, onClose, showBack = false }: PlaceDetailPro
             )}
           </section>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

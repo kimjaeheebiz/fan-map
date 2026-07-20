@@ -1,5 +1,6 @@
 "use client";
 
+import { HorizontalScroll } from "@/components/common/horizontal-scroll";
 import { cn } from "@/lib/utils";
 
 type PlaceImageGalleryProps = {
@@ -16,11 +17,9 @@ export function PlaceImageGallery({
   if (images.length === 0) return null;
 
   return (
-    <div
-      className={cn(
-        "flex gap-2 overflow-x-auto overscroll-x-contain pb-1 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        className,
-      )}
+    <HorizontalScroll
+      className={className}
+      contentClassName="gap-2 pb-1 snap-x snap-mandatory"
     >
       {images.map((src, index) => (
         // eslint-disable-next-line @next/next/no-img-element
@@ -34,6 +33,6 @@ export function PlaceImageGallery({
           )}
         />
       ))}
-    </div>
+    </HorizontalScroll>
   );
 }

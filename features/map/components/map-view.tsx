@@ -10,6 +10,7 @@ import {
 import { loadNaverMapsSdk } from "@/features/map/lib/load-naver-sdk";
 import {
   createPlaceMarkerIcon,
+  syncMarkerFavorites,
   syncMarkerSelection,
 } from "@/features/map/lib/marker-icon";
 import type { MapBounds } from "@/features/map/lib/map-bounds";
@@ -28,6 +29,7 @@ export type MapViewHandle = {
 type MapViewProps = {
   places: Place[];
   selectedPlaceId: string | null;
+  favoritePlaceIds?: string[];
   onSelectPlace: (placeId: string, source: "map") => void;
   onMapReady?: () => void;
   className?: string;
@@ -35,7 +37,14 @@ type MapViewProps = {
 
 export const MapView = forwardRef<MapViewHandle, MapViewProps>(
   function MapView(
-    { places, selectedPlaceId, onSelectPlace, onMapReady, className },
+    {
+      places,
+      selectedPlaceId,
+      favoritePlaceIds = [],
+      onSelectPlace,
+      onMapReady,
+      className,
+    },
     ref,
   ) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -127,6 +136,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
       const { maps } = window.naver;
       const map = mapRef.current;
       const nextIds = new Set(places.map((p) => p.id));
+      const favoriteSet = new Set(favoritePlaceIds);
 
       markersRef.current.forEach((marker, id) => {
         if (!nextIds.has(id)) {
@@ -138,7 +148,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
       for (const place of places) {
         const position = new maps.LatLng(place.lat, place.lng);
         const selected = place.id === selectedPlaceId;
-        const icon = createPlaceMarkerIcon(maps, place.id);
+        const favorite = favoriteSet.has(place.id);
+        const icon = createPlaceMarkerIcon(maps, place.id, { favorite });
         let marker = markersRef.current.get(place.id);
 
         if (!marker) {
@@ -147,7 +158,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
             position,
             title: place.name,
             icon,
-            zIndex: selected ? 10 : 1,
+            zIndex: selected ? 10 : favorite ? 5 : 1,
           });
           maps.Event.addListener(marker, "click", () => {
             onSelectRef.current(place.id, "map");
@@ -156,12 +167,14 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
         } else {
           marker.setPosition(position);
           marker.setMap(map);
-          marker.setZIndex(selected ? 10 : 1);
+          marker.setIcon(icon);
+          marker.setZIndex(selected ? 10 : favorite ? 5 : 1);
         }
       }
 
       syncMarkerSelection(containerRef.current, selectedPlaceId);
-    }, [places, selectedPlaceId, status]);
+      syncMarkerFavorites(containerRef.current, favoritePlaceIds);
+    }, [places, selectedPlaceId, favoritePlaceIds, status]);
 
     return (
       <div className={cn("relative h-full w-full", className)}>

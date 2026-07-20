@@ -87,16 +87,16 @@ export const primaryColorTokens: Record<
   },
   rose: {
     light: {
-      primary: "#ec003f",
-      primaryForeground: "#fff1f2",
-      sidebarPrimary: "#ec003f",
-      sidebarPrimaryForeground: "#fff1f2",
+      primary: "#f11650",
+      primaryForeground: "#fff5f7",
+      sidebarPrimary: "#f11650",
+      sidebarPrimaryForeground: "#fff5f7",
     },
     dark: {
-      primary: "#ff637e",
-      primaryForeground: "#42151b",
-      sidebarPrimary: "#ff637e",
-      sidebarPrimaryForeground: "#42151b",
+      primary: "#ff4d78",
+      primaryForeground: "#2c0610",
+      sidebarPrimary: "#ff4d78",
+      sidebarPrimaryForeground: "#2c0610",
     },
   },
   zinc: {
