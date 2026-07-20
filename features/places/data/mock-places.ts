@@ -1,4 +1,4 @@
-import type { Place } from "@/features/places/types";
+﻿import type { Place } from "@/features/places/types";
 
 /** 작은 SVG placeholder (data URL) — UI용 대표/후기 이미지 */
 function placeholderImage(label: string, color: string) {
@@ -8,12 +8,12 @@ function placeholderImage(label: string, color: string) {
 
 /**
  * 잠실·고척 야구장 주변 Mock Place (약 14곳).
- * 좌표는 공개 위경도 근처이며, 이후 카카오 검색 결과와 같은 Place 타입을 쓴다.
+ * 좌표는 공개 위경도 근처이며, 이후 네이버 Local Search 선택 결과와 같은 Place 타입을 쓴다.
  */
 export const mockPlaces: Place[] = [
   {
     id: "place-jamsil-01",
-    kakaoPlaceId: "mock-jamsil-01",
+    naverPlaceId: "mock-jamsil-01",
     name: "잠실 응원 포차",
     address: "서울 송파구 올림픽로 25",
     lat: 37.5138,
@@ -54,7 +54,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-02",
-    kakaoPlaceId: "mock-jamsil-02",
+    naverPlaceId: "mock-jamsil-02",
     name: "올림픽공원 치킨집",
     address: "서울 송파구 올림픽로 424",
     lat: 37.5205,
@@ -79,7 +79,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-03",
-    kakaoPlaceId: "mock-jamsil-03",
+    naverPlaceId: "mock-jamsil-03",
     name: "석촌호수 스포츠바",
     address: "서울 송파구 석촌호수로 222",
     lat: 37.5089,
@@ -106,7 +106,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-04",
-    kakaoPlaceId: "mock-jamsil-04",
+    naverPlaceId: "mock-jamsil-04",
     name: "잠실새내 맥주창고",
     address: "서울 송파구 백제고분로 7길",
     lat: 37.5112,
@@ -131,7 +131,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-05",
-    kakaoPlaceId: "mock-jamsil-05",
+    naverPlaceId: "mock-jamsil-05",
     name: "롯데월드몰 라운지",
     address: "서울 송파구 올림픽로 300",
     lat: 37.5133,
@@ -155,7 +155,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-06",
-    kakaoPlaceId: "mock-jamsil-06",
+    naverPlaceId: "mock-jamsil-06",
     name: "잠실역 야구 펍",
     address: "서울 송파구 올림픽로 240",
     lat: 37.5145,
@@ -184,7 +184,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-07",
-    kakaoPlaceId: "mock-jamsil-07",
+    naverPlaceId: "mock-jamsil-07",
     name: "송파 족발과 스크린",
     address: "서울 송파구 송파대로 567",
     lat: 37.5058,
@@ -208,7 +208,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-08",
-    kakaoPlaceId: "mock-jamsil-08",
+    naverPlaceId: "mock-jamsil-08",
     name: "방이 이자카야",
     address: "서울 송파구 위례성대로 18",
     lat: 37.5169,
@@ -233,7 +233,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-gocheok-01",
-    kakaoPlaceId: "mock-gocheok-01",
+    naverPlaceId: "mock-gocheok-01",
     name: "고척 히어로즈 펍",
     address: "서울 구로구 경인로 240",
     lat: 37.4985,
@@ -260,7 +260,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-gocheok-02",
-    kakaoPlaceId: "mock-gocheok-02",
+    naverPlaceId: "mock-gocheok-02",
     name: "구로디지털 스크린홀",
     address: "서울 구로구 디지털로 300",
     lat: 37.4852,
@@ -285,7 +285,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-gocheok-03",
-    kakaoPlaceId: "mock-gocheok-03",
+    naverPlaceId: "mock-gocheok-03",
     name: "오류동 야구식당",
     address: "서울 구로구 경인로 20",
     lat: 37.4941,
@@ -308,7 +308,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-gocheok-04",
-    kakaoPlaceId: "mock-gocheok-04",
+    naverPlaceId: "mock-gocheok-04",
     name: "신도림 응원바",
     address: "서울 구로구 새말로 97",
     lat: 37.5088,
@@ -333,7 +333,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-09",
-    kakaoPlaceId: "mock-jamsil-09",
+    naverPlaceId: "mock-jamsil-09",
     name: "종합운동장 앞 호프",
     address: "서울 송파구 올림픽로 25길",
     lat: 37.5106,
@@ -358,7 +358,7 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "place-jamsil-10",
-    kakaoPlaceId: "mock-jamsil-10",
+    naverPlaceId: "mock-jamsil-10",
     name: "잠실 한강뷰 카페펍",
     address: "서울 송파구 올림픽로 35",
     lat: 37.5182,
@@ -399,5 +399,5 @@ export const mockPlaces: Place[] = [
 export const DEFAULT_MAP_CENTER = {
   lat: 37.5121,
   lng: 127.0719,
-  level: 5,
+  zoom: 15,
 } as const;

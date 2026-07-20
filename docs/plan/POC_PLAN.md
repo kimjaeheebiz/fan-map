@@ -2,8 +2,8 @@
 
 > 작성 기준: `PROJECT_BRIEF.md` + 현재 저장소 실측 분석  
 > 작성일: 2026-07-20  
-> 수정일: 2026-07-20 (PoC 단순화 · GPT 리뷰 반영)  
-> 상태: **계획 확정에 근접** — 추가 문서 다듬기보다 Phase 1 구현 권장
+> 수정일: 2026-07-20 (네이버 지도·Local Search)  
+> 상태: **지도 = 네이버** (Maps JS + Local Search)
 
 ---
 
@@ -13,7 +13,7 @@
 |------|------|
 | `docs/plan/PROJECT_BRIEF.md` | 제품/PoC 요구사항 (이미 존재) |
 | `docs/plan/POC_PLAN.md` | 본 문서 — 현황 분석·범위·흐름·모델·단계 계획 |
-| `docs/plan/SETUP.md` *(구현 착수 시)* | 카카오 키·환경변수 준비 체크리스트 |
+| `docs/plan/SETUP.md` *(구현 착수 시)* | 네이버 지도·검색 키·환경변수 준비 체크리스트 |
 | `docs/plan/DECISIONS.md` *(후속)* | 확정 결정 기록 |
 | `docs/plan/CHECKLIST.md` *(후속)* | 단계별 완료 체크리스트 |
 
@@ -34,8 +34,8 @@
 | PoC에서 하지 않음 (후속 확장) | PoC에서 함 |
 |------------------------------|------------|
 | Repository 패턴 | `features/places`에 함수·mock·localStorage 직접 작성 |
-| Mapper 계층 | 카카오 응답을 Place 필드에 바로 매핑 (필요 시 작은 헬퍼 함수 1개) |
-| Provider 추상화 | 카카오만 사용 |
+| Mapper 계층 | 네이버 응답을 Place 필드에 바로 매핑 (필요 시 작은 헬퍼 함수 1개) |
+| Provider 추상화 | **네이버만** 사용 (지도 JS + Local Search) |
 | 불필요한 인터페이스 분리 | 타입이 있으면 됨. 교체 지점은 함수 시그니처 수준으로만 |
 
 ---
@@ -46,13 +46,13 @@ UI/UX 참고 대상입니다. **복제하지 않고** Fan Map 목적에 맞게 �
 
 | 서비스 | 참고할 점 |
 |--------|-----------|
-| **거지맵** | 지도 우선 첫 화면, 마커·목록 연계, 제보 흐름, 모바일 지도 탐색 |
-| **카카오맵** | 국내 장소 검색·마커·상세 정보 밀도, 현위치·재검색 UX |
-| **네이버 지도** | 목록↔지도 전환, 필터·검색 바 배치 |
+| **거지맵** | 지도 우선, 마커·목록 연계, **제보 시 상호명 네이버 검색→결과 선택→주소 반영**, 모바일 지도 탐색 |
+| **네이버 지도** | PoC 지도 SDK·마커·현위치·재검색 UX (구현 기준) |
 | **Google Maps** | 마커 선택 후 하단/사이드 상세, 정보 위계 |
 | **Airbnb Map** | 지도+카드 목록 동기화, 선택 강조, 데스크톱 분할·모바일 시트 |
 
-거지맵의 브랜드·가격·앱테크·커뮤니티 등은 참고하지 않습니다.
+거지맵의 브랜드·가격·앱테크·커뮤니티·메뉴/가격 입력 UI 등은 참고하지 않습니다.  
+제보의 **「상호명 검색 (네이버 결과 기준)」** 패턴만 Fan Map 관람 제보에 맞게 가져옵니다.
 
 ---
 
@@ -121,8 +121,8 @@ fan-map/
 |------|------|
 | 관리자 셸 ↔ 지도 UX 불일치 | `(map)` 레이아웃 신설 |
 | Next.js 16 API 차이 | `node_modules/next/dist/docs/` 확인 |
-| 카카오맵 SSR | Client + `dynamic(..., { ssr: false })` |
-| REST API 키 노출 | Route Handler 프록시 |
+| 네이버 지도 SSR | Client + `dynamic(..., { ssr: false })` |
+| REST/Search 키 노출 | Route Handler 프록시 (`NAVER_SEARCH_*` 서버 전용) |
 | localStorage 용량 (이미지 Base64) | 장당 리사이즈·압축, 최대 5장, 용량 초과 시 안내 |
 | 테스트 부재 | 기능 완성 후 필요 시 최소 추가 |
 
@@ -167,7 +167,8 @@ fan-map/
 | 구분 | 내용 |
 |------|------|
 | 활용 | next, react, tanstack-query, rhf, zod, shadcn/Base UI, sonner, lucide |
-| 카카오맵 | JS SDK 스크립트 로드 — **추가 npm 없어도 가능** |
+| 네이버 지도 | JS SDK 스크립트 로드 — **추가 npm 없어도 가능** |
+| 네이버 Local Search | 제보 상호명 검색 — 서버 프록시 |
 | 후속 | S3 / R2 / Supabase Storage, 인증 등 |
 
 ---
@@ -197,7 +198,7 @@ ViewingReport (관람 제보 — Place의 하위 정보)
 | M3 | Place 마커 + 선택 강조 |
 | M4 | Place 요약/상세 (기본정보 + 하위 제보 목록) |
 | M5 | 검색 + 필터: 종목 / 최근 제보 / 즐겨찾기 |
-| M6 | 카카오 장소 선택 → ViewingReport 등록 |
+| M6 | **네이버 Local Search**로 상호명 검색 → 결과 선택 → ViewingReport 등록 |
 | M7 | 제보 필수: 종목, 관람일, 후기 / 선택: 팀, 태그, **사진(최대 5장)** |
 | M8 | 즐겨찾기 (localStorage) |
 | M9 | 신뢰 카피 (“관람 제보”, 매장 확인 안내) |
@@ -222,15 +223,14 @@ ViewingReport (관람 제보 — Place의 하위 정보)
 | F2 | 이미지 서버 업로드 (S3 / Cloudflare R2 / Supabase Storage) |
 | F3 | 신고·운영 어드민 |
 | F4 | **League**·경기 마스터·상영 스케줄 |
-| F5 | Repository / Mapper / Provider 추상화, 다중 지도 SDK |
+| F5 | Repository / Mapper / Provider 추상화 |
 | F6 | 푸시·커뮤니티·포인트 |
-| F7 | 네이버맵 등 이중 지원 |
 
 ### 이번 범위 제외
 
-- 거지맵식 가격·출석·광고·핫딜
+- 거지맵식 가격·출석·광고·핫딜·메뉴/가격 입력
 - “공식 중계 매장” 단정 표현
-- 카카오 장소 없이 주소 수동 생성
+- 네이버 검색 없이 주소·상호 수동 생성
 - **League** 모델·UI
 - Repository / Mapper / Provider 계층
 - 서버 이미지 업로드
@@ -281,10 +281,14 @@ ViewingReport (관람 제보 — Place의 하위 정보)
 
 ## 4-6. ViewingReport 제보 (Place에 추가)
 
-1. “제보하기”  
-2. 카카오 장소 검색·선택 → Place 확보(신규면 생성)  
-3. 종목·관람일·후기(+ 팀·태그·**사진 ≤5**)  
-4. Place의 `reports`에 추가 → 집계·커버 이미지 갱신
+거지맵 「상호명 검색 (네이버 결과 기준)」과 같은 선택 흐름을 사용합니다.
+
+1. “제보하기”
+2. 상호명 입력 → **네이버 Local Search** (서버 프록시)
+3. 검색 결과(최대 N건)에서 장소 선택 — 도로명·지번 확인
+4. 선택 시 Place 이름·주소·좌표 반영 (신규면 Place 생성)
+5. 종목·관람일·후기(+ 팀·태그·**사진 ≤5**)
+6. 제출 → Place의 `reports`에 추가 → 집계·커버 이미지 갱신
 
 ## 4-7. 제보 후 반영
 
@@ -321,8 +325,10 @@ ViewingReport (관람 제보 — Place의 하위 정보)
 
 | 항목 | 내용 |
 |------|------|
-| 컴포넌트 | PlacePicker, ReportForm, ImagePicker (미리보기) |
-| 상태 | 검색 중, 제출 중, 이미지 용량 오류 |
+| 목적 | 네이버 Local Search로 실제 장소를 고른 뒤 관람 경험 등록 |
+| 컴포넌트 | PlacePicker (Local Search), ReportForm, ImagePicker |
+| 참고 UX | 거지맵 제보의 상호명 검색·결과 목록·선택 주소 반영 |
+| 상태 | 검색 전 안내, 검색 중, 결과 N건, 결과 없음, 제출 중, 이미지 용량 오류 |
 
 ## 5-2. 신뢰 카피
 
@@ -354,13 +360,13 @@ type Place = {
 | 필드 | 필수 | PoC | 설명 |
 |------|------|-----|------|
 | id | Y | Y | Fan Map id |
-| kakaoPlaceId | N | Y | 카카오 연동 후·제보 시. mock은 임의 문자열 가능 |
+| naverPlaceId | N | Y | Local Search/지도 연동 식별자. mock은 임의 문자열 가능 |
 | name | Y | Y | |
-| address | Y | Y | |
+| address | Y | Y | 도로명 우선, 지번 보조 가능 |
 | lat, lng | Y | Y | |
 | phone | N | Y | |
 | categoryName | N | Y | |
-| kakaoUrl | N | Y | 원본 링크 |
+| naverMapUrl | N | Y | 원본 네이버 지도/장소 링크 (선택) |
 | coverImageUrl | N | Y | 대표 이미지 (Base64 또는 이후 URL). 자동 규칙은 아래 참고 |
 | sportIds | N | Y | 제보에서 모아도 됨 (저장 필드는 선택 — UI에서 reports로부터 계산 가능) |
 | teamIds | N | Y | 동일 |
@@ -390,7 +396,7 @@ coverImageUrl가 이미 존재하면
 
 이후 관리자가 대표 이미지를 직접 지정해도 같은 필드를 쓰면 됩니다.
 
-카카오/자체 출처를 필드명으로만 구분합니다. Provider 타입·계층은 두지 않습니다.
+네이버 검색/자체 출처를 필드명으로만 구분합니다. Provider 타입·계층은 두지 않습니다.
 
 ## 6-2. ViewingReport (Place 하위)
 
@@ -453,25 +459,25 @@ coverImageUrl가 이미 존재하면
 
 ## 6-8. Mock 데이터 전략
 
-카카오 **장소 검색 API 이전**에도 UI·지도 마커를 검증하기 위해 mock Place를 둡니다.
+네이버 **Local Search 연동 이전**에도 UI·지도 마커를 검증하기 위해 mock Place를 둡니다.
 
 | 항목 | 내용 |
 |------|------|
 | 수량 | **약 10~20개** Place |
 | 위치 | 실제 야구장 주변 (예: 잠실, 고척 — 공개 위경도 근처) |
 | 제보 | 각 Place에 ViewingReport 1~3건 |
-| 이미지 | **일부 Place는 `coverImageUrl` 포함** / **일부 ViewingReport는 `images` 포함** (UI에서 커버·갤러리 바로 확인) |
+| 이미지 | **일부 Place는 `coverImageUrl` 포함** / **일부 ViewingReport는 `images` 포함** |
 | 형태 | `features/places/data/mock-places.ts` — **최종 Place 타입과 동일** |
-| 교체 | 카카오 검색·제보 결과도 같은 Place 타입으로 합침. Mapper 계층 없음 |
+| 교체 | Local Search 선택 결과도 같은 Place 타입으로 합침. Mapper 계층 없음 |
 
-개발 순서: **Mock Place + 실지도 마커 → 카카오 장소 검색·제보 연동**.
+개발 순서: **Mock Place + 실지도(네이버) 마커 → Local Search 제보 연동**.
 
 ## 6-9. 저장 (단순)
 
 ```
 초기: mock-places.ts → fan-map:places 시드
 런타임: fan-map:places, fan-map:favorites
-카카오 Local API: 제보 시 장소 검색 (Route Handler)
+네이버 Local Search: 제보 시 상호명 검색 (Route Handler)
 이미지: Base64 문자열로 Place/Report 필드에 포함
 ```
 
@@ -497,7 +503,8 @@ app/
     page.tsx                # 지도 홈 (Place 탐색)
   (main)/guide/...          # 유지
   (auth)/...                # 유지 (미사용)
-  api/kakao/...             # Local API 프록시
+  api/naver/local-search/route.ts  # Local Search 프록시
+  api/naver/...                    # 필요 시 추가
 features/
   map/                      # MapView, 마커, geolocation, SDK 로드
   places/                   # ★ 중심
@@ -529,65 +536,75 @@ config/app.ts
 
 # 8. 지도 API 연동 전략
 
-## 8-1. 카카오맵 (PoC 단일)
+## 8-1. 네이버 지도 + Local Search (PoC)
 
 | 구분 | 방식 |
 |------|------|
-| 지도 | Kakao Maps JS SDK |
+| 지도 | 네이버 지도 JavaScript API (`ncpClientId`) |
 | 환경변수 | 아래 SETUP 참고 |
-| 장소 검색 | Local REST → `app/api/kakao/...` 프록시 |
+| 제보 장소 검색 | 네이버 **검색 > 지역(Local)** → `app/api/naver/local-search` 프록시 |
 | 현위치 | `navigator.geolocation` |
 | 마커 | Place 좌표 기준, 선택 강조 |
 | 재검색 | 버튼 우선 (호출 억제) |
 
-Admin Key는 **사용하지 않습니다**.
-
 ## 8-2. SDK 로딩
 
-- 클라이언트에서 스크립트 1회 로드
+- 클라이언트에서 네이버 지도 스크립트 1회 로드
 - 지도 영역 `dynamic(..., { ssr: false })`
 - 타입은 최소 ambient 선언
 
-## 8-3. kakaoPlaceId
+## 8-3. Local Search → Place (제보)
 
-- 제보 시 카카오 `id`를 Place에 저장 → 같은 장소 재제보는 기존 Place에 report만 추가
-- 캐시 정책은 카카오 가이드 확인 *(확인 필요)*
+거지맵과 같이 **상호명 검색 → 결과 선택**만 허용합니다.
+
+1. 사용자가 상호명(+ 지역 키워드) 입력
+2. 서버가 Local Search 호출 (Client ID/Secret 미노출)
+3. 결과 목록에 상호·도로명·지번 표시 (PoC에서 건수 상한 예: 5건)
+4. 선택 시 이름·주소·좌표를 Place에 반영
+5. `naverPlaceId`(가능 시) 저장 → 같은 장소 재제보는 기존 Place에 report만 추가
+
+좌표가 검색 응답에 없으면 Geocoding 등 보조 API는 **후속**으로 두고, PoC는 응답에 있는 필드로 충분할 때 진행합니다. *(확인 필요)*
 
 ---
 
-# 9. 카카오 API · 개발 준비 (SETUP)
+# 9. 네이버 API · 개발 준비 (SETUP)
 
-구현 전(또는 Phase 2 전 JS Key) 필수 준비입니다. 상세는 착수 시 `docs/plan/SETUP.md`로 분리해도 됩니다.
+구현·교체 전 필수 준비입니다. 상세는 `docs/plan/SETUP.md`로 분리해도 됩니다.
 
 ### 필수 체크리스트
 
-- [ ] [Kakao Developers](https://developers.kakao.com/) 앱 생성
-- [ ] **JavaScript Key** 발급
-- [ ] **REST API Key** 발급
-- [ ] 플랫폼에 **localhost** 도메인 등록 (배포 시 배포 도메인 추가)
-- [ ] 프로젝트 루트에 `.env.local` 생성
+- [ ] [네이버 클라우드 플랫폼](https://www.ncloud.com/) Application 생성
+- [ ] **Maps** (Dynamic Map) 활성화 · Web 서비스 URL에 `http://localhost:3000` 등록
+- [ ] Maps **Client ID** / **Client Secret** 발급
+- [ ] **검색 > 지역(Local)** API용 Application (또는 동일 앱에 검색 API) Client ID / Secret 발급
+- [ ] 프로젝트 루트 `.env.local` 설정
 
 ### 환경 변수
 
 ```env
-NEXT_PUBLIC_KAKAO_MAP_KEY=
+# NAVER Maps
+NEXT_PUBLIC_NAVER_MAP_CLIENT_ID=
+NAVER_MAP_CLIENT_SECRET=
 
-KAKAO_REST_API_KEY=
+# NAVER Local Search
+NAVER_SEARCH_CLIENT_ID=
+NAVER_SEARCH_CLIENT_SECRET=
 ```
 
 | 변수 | 용도 | 노출 |
 |------|------|------|
-| `NEXT_PUBLIC_KAKAO_MAP_KEY` | 지도 JS SDK | 클라이언트 (공개) |
-| `KAKAO_REST_API_KEY` | Local API (검색) | **서버만** |
+| `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID` | 지도 JavaScript (`ncpClientId`) | 클라이언트 (공개) |
+| `NAVER_MAP_CLIENT_SECRET` | Maps 관련 REST (필요 시) | **서버만** |
+| `NAVER_SEARCH_CLIENT_ID` | Local Search (제보 상호명 검색) | **서버만** |
+| `NAVER_SEARCH_CLIENT_SECRET` | Local Search | **서버만** |
 
-- **Admin Key**: 사용하지 않음  
-- `.env.local`은 git에 커밋하지 않음 (이미 `.gitignore`에 `.env*` 포함)
+- `.env.local`은 git에 커밋하지 않음
 
 ### 개발 순서와의 관계
 
 1. Phase 1: 셸 (키 불필요)  
-2. Phase 2: **JS Key 필요** — Mock 좌표를 **실제 카카오 지도** 위 마커로 표시하며 UI 개발  
-3. REST Key: 장소 검색·제보 연동 (Phase 5~6)
+2. Phase 2: **Maps Client ID** — Mock 좌표를 **실제 네이버 지도** 위 마커로 표시  
+3. **Local Search** 키: 제보 상호명 검색·선택 (Phase 5~6)
 
 ---
 
@@ -612,10 +629,10 @@ KAKAO_REST_API_KEY=
 
 | 항목 | 내용 |
 |------|------|
-| 목표 | 야구장 주변 Place 10~20 mock을 **실제 카카오 지도** 위에 마커로 표시 + 목록·상세·선택 |
-| 선행 | `.env.local`에 `NEXT_PUBLIC_KAKAO_MAP_KEY`, localhost 도메인 등록 |
+| 목표 | 야구장 주변 Place 10~20 mock을 **실제 네이버 지도** 위에 마커로 표시 + 목록·상세·선택 |
+| 선행 | `.env.local`에 `NEXT_PUBLIC_NAVER_MAP_CLIENT_ID`, Web 서비스 URL 등록 |
 | 완료 | 지도에서 mock Place 마커 확인, 클릭 시 상세에 reports·이미지 표시 |
-| 비고 | Place 타입·mock은 이후 카카오 검색과 동일 형태. SDK는 단순하므로 플레이스홀더 지도는 쓰지 않음 |
+| 비고 | Place 타입·mock은 이후 Local Search 선택 결과와 동일 형태. 플레이스홀더 지도는 쓰지 않음 |
 
 ## Phase 3 — 지도 상호작용 보강
 
@@ -635,15 +652,16 @@ KAKAO_REST_API_KEY=
 
 | 항목 | 내용 |
 |------|------|
-| 목표 | 필터 3종 + (REST 키 준비 시) 카카오 검색 프록시 |
+| 목표 | 필터 3종 + (홈 검색 UX). Local Search 프록시는 제보(Phase 6)와 공유 가능 |
 | 완료 | 필터 시 Place 마커 변화 |
 
 ## Phase 6 — ViewingReport 제보 + 사진
 
 | 항목 | 내용 |
 |------|------|
-| 목표 | 장소 선택 → 폼 → images ≤5 (Base64) → `fan-map:places` 갱신 |
+| 목표 | **상호명 Local Search → 결과 선택** → 폼 → images ≤5 (Base64) → `fan-map:places` 갱신 |
 | 완료 | 새로고침 후에도 제보·사진 유지, coverImage 규칙 반영 |
+| UX | 거지맵형: 검색 안내 → 결과 N건 → 선택 주소 적용 → 관람 정보 입력 |
 
 ## Phase 7 — 즐겨찾기
 
@@ -679,12 +697,12 @@ KAKAO_REST_API_KEY=
 
 | # | 항목 | 상태 | 액션 |
 |---|------|------|------|
-| 1 | 카카오 JS/REST 키·localhost 등록 | 미확인 | SETUP 체크리스트 |
-| 2 | Local API 결과 저장 범위 | 확인 필요 | 카카오 가이드 |
-| 3 | Next 16 + SDK 스크립트 | 미검증 | Phase 2 |
-| 4 | localStorage 이미지 용량 | 위험 | 리사이즈·5장 제한 |
-| 5 | 기본 지도 중심 | 미정 | mock 야구장 좌표 우선 |
-| 6 | package name `starter-web` | 잔존 | Phase 1에서 `fan-map` |
+| 1 | 네이버 Maps Client ID · Web URL 등록 | 키 입력됨 | localhost 지도 로드 검증 |
+| 2 | Local Search 키 · 제보 검색 | 키 입력됨 | 프록시·결과 선택 UX |
+| 3 | Local Search 좌표/ID 필드 | 확인 필요 | 네이버 API 응답 스펙 |
+| 4 | Next 16 + 네이버 지도 SDK | 검증 필요 | `npm run dev` |
+| 5 | localStorage 이미지 용량 | 위험 | 리사이즈·5장 제한 |
+| 6 | 기본 지도 중심 | 미정 | mock 야구장 좌표 우선 |
 | 7 | guide / auth | 유지 | 삭제 금지, 배포 직전 재결정 |
 
 ---
@@ -702,7 +720,7 @@ KAKAO_REST_API_KEY=
 7. [ ] `(auth)` — **삭제하지 않음**, 네비·홈 링크만 제거  
 8. [ ] `guide` — **삭제하지 않음**, 개발 시 직접 URL로 접근  
 9. [ ] 지도 영역 자리(빈 Map 슬롯)로 브라우저에서 셸 확인 — 실지도는 Phase 2  
-10. [ ] 카카오 JS Key 발급 준비 (§9 체크리스트)  
+10. [ ] 네이버 Maps / Local Search 키 준비 (§9) — **완료 시 체크**  
 11. [ ] `npm run build` 확인  
 
 **Phase 1 완료**: Fan Map 지도 셸이 `/`에 보이고, auth·guide 코드는 저장소에 남아 있음.
@@ -711,5 +729,5 @@ KAKAO_REST_API_KEY=
 
 ## 다음 대기
 
-GPT 리뷰 반영까지 완료했습니다.  
-승인하시면 **Phase 1**부터 구현을 시작합니다.
+지도 SDK는 **네이버**로 교체했습니다.  
+다음은 제보 흐름에 **Local Search**(거지맵형 상호명 검색)를 붙이는 작업입니다.

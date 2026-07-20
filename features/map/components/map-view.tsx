@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { loadKakaoMapsSdk } from "@/features/map/lib/load-kakao-sdk";
-import type { KakaoMap, KakaoMarker } from "@/features/map/types/kakao";
+import { loadNaverMapsSdk } from "@/features/map/lib/load-naver-sdk";
+import type { NaverMap, NaverMarker } from "@/features/map/types/naver";
 import type { Place } from "@/features/places/types";
 import { DEFAULT_MAP_CENTER } from "@/features/places/data/mock-places";
 import { EmptyState } from "@/components/common/empty-state";
@@ -23,8 +23,8 @@ export function MapView({
   className,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<KakaoMap | null>(null);
-  const markersRef = useRef<Map<string, KakaoMarker>>(new Map());
+  const mapRef = useRef<NaverMap | null>(null);
+  const markersRef = useRef<Map<string, NaverMarker>>(new Map());
   const onSelectRef = useRef(onSelectPlace);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -38,17 +38,17 @@ export function MapView({
 
     async function init() {
       try {
-        await loadKakaoMapsSdk();
-        if (cancelled || !containerRef.current || !window.kakao?.maps) return;
+        await loadNaverMapsSdk();
+        if (cancelled || !containerRef.current || !window.naver?.maps) return;
 
-        const { maps } = window.kakao;
+        const { maps } = window.naver;
         const center = new maps.LatLng(
           DEFAULT_MAP_CENTER.lat,
           DEFAULT_MAP_CENTER.lng,
         );
         const map = new maps.Map(containerRef.current, {
           center,
-          level: DEFAULT_MAP_CENTER.level,
+          zoom: DEFAULT_MAP_CENTER.zoom,
         });
         mapRef.current = map;
         setStatus("ready");
@@ -67,14 +67,15 @@ export function MapView({
       cancelled = true;
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current.clear();
+      mapRef.current?.destroy?.();
       mapRef.current = null;
     };
   }, []);
 
   useEffect(() => {
-    if (status !== "ready" || !mapRef.current || !window.kakao?.maps) return;
+    if (status !== "ready" || !mapRef.current || !window.naver?.maps) return;
 
-    const { maps } = window.kakao;
+    const { maps } = window.naver;
     const map = mapRef.current;
     const nextIds = new Set(places.map((p) => p.id));
 
@@ -95,7 +96,7 @@ export function MapView({
           position,
           title: place.name,
         });
-        maps.event.addListener(marker, "click", () => {
+        maps.Event.addListener(marker, "click", () => {
           onSelectRef.current(place.id);
         });
         markersRef.current.set(place.id, marker);
@@ -109,13 +110,13 @@ export function MapView({
   }, [places, selectedPlaceId, status]);
 
   useEffect(() => {
-    if (status !== "ready" || !mapRef.current || !window.kakao?.maps) return;
+    if (status !== "ready" || !mapRef.current || !window.naver?.maps) return;
     if (!selectedPlaceId) return;
 
     const place = places.find((p) => p.id === selectedPlaceId);
     if (!place) return;
 
-    const { maps } = window.kakao;
+    const { maps } = window.naver;
     mapRef.current.setCenter(new maps.LatLng(place.lat, place.lng));
   }, [selectedPlaceId, places, status]);
 

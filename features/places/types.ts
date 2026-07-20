@@ -18,14 +18,14 @@ export type ViewingReport = {
 
 export type Place = {
   id: string;
-  kakaoPlaceId?: string;
+  naverPlaceId?: string;
   name: string;
   address: string;
   lat: number;
   lng: number;
   phone?: string;
   categoryName?: string;
-  kakaoUrl?: string;
+  naverMapUrl?: string;
   /** 대표 이미지. 비어 있으면 첫 제보 images[0] 사용 */
   coverImageUrl?: string;
   reports: ViewingReport[];
