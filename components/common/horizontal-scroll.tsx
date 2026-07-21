@@ -14,10 +14,8 @@ import { cn } from "@/lib/utils";
 type HorizontalScrollProps = {
   children: ReactNode;
   className?: string;
-  /** 스크롤 트랙(가로 flex 영역) 클래스 */
-  contentClassName?: string;
-  /** 한 번 이동 시 스크롤 비율 (뷰포트 대비). 기본 0.75 */
-  scrollRatio?: number;
+  contentClassName?: string; // 스크롤 트랙(가로 flex 영역) 클래스
+  scrollRatio?: number; // 한 번 이동 시 스크롤 비율 (뷰포트 대비). 기본 0.75
 };
 
 type ScrollNavButtonProps = {
@@ -40,6 +38,7 @@ function ScrollNavButton({ direction, visible, onClick }: ScrollNavButtonProps) 
         type="button"
         variant="secondary"
         size="icon-sm"
+        className="opacity-70 hover:opacity-100"
         aria-label={direction === "left" ? "왼쪽으로 이동" : "오른쪽으로 이동"}
         onClick={onClick}
       >

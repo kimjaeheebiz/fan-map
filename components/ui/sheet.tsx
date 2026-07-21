@@ -44,8 +44,7 @@ function SheetContent({
   ...props
 }: SheetPrimitive.Popup.Props & {
   side?: "top" | "right" | "bottom" | "left"
-  /** Header 없이 닫기 버튼이 필요할 때만 true. 기본은 SheetHeader에 표시 */
-  showCloseButton?: boolean
+  showCloseButton?: boolean // Header 없이 닫기 버튼이 필요할 때만 true. 기본은 SheetHeader에 표시
 }) {
   return (
     <SheetPortal>

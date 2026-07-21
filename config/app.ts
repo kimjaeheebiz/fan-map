@@ -1,4 +1,4 @@
-export type ThemeMode = "light" | "dark" | "system";
+export type ThemeMode = "light" | "dark";
 export type PrimaryColor =
   | "blue"
   | "green"
@@ -31,9 +31,9 @@ export type AppConfig = {
  */
 export const appConfig: AppConfig = {
   name: "Fan Map",
-  theme: "system",
+  theme: "light",
   primaryColor: "rose",
-  radius: "sm",
+  radius: "lg",
   layout: "vertical",
   sidebar: "expanded",
   header: "fixed",

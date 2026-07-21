@@ -10,15 +10,13 @@ export type NavItem = {
   title: string;
   href: string;
   icon?: string;
-  /** true면 메뉴에서 숨김 (기본 노출) */
-  hidden?: boolean;
+  hidden?: boolean; // true면 메뉴에서 숨김 (기본 노출)
   items?: NavItem[];
 };
 
 export type NavSection = {
   title?: string;
-  /** true면 섹션 전체 숨김 (기본 노출) */
-  hidden?: boolean;
+  hidden?: boolean; // true면 섹션 전체 숨김 (기본 노출)
   items: NavItem[];
 };
 

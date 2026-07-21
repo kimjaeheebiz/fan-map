@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { appConfig } from "@/config/app";
+import { ThemeSwitcher } from "@/components/common/theme-switcher";
 import { Button } from "@/components/ui/button";
 
 type RegisterReport = (handler: (() => void) | null) => void;
@@ -63,11 +64,13 @@ export function MapShell({ children }: MapShellProps) {
             </span>
             <span>{appConfig.name}</span>
           </Link>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1">
+            <ThemeSwitcher />
             {hasReportAction ? (
               <Button
                 type="button"
                 size="sm"
+                className="ml-1"
                 onClick={() => reportHandlerRef.current?.()}
               >
                 <Plus data-icon="inline-start" />

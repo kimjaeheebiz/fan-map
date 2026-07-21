@@ -41,16 +41,9 @@ type PlaceDetailProps = {
   place: Place;
   onClose?: () => void;
   onReport?: () => void;
-  /** 닫기 왼쪽 — 즐겨찾기·공유 등 */
-  headerActions?: ReactNode;
-  /** 모바일 시트에서 목록으로 돌아가는 뒤로가기 */
-  showBack?: boolean;
-  /**
-   * 드래그 핸들 바.
-   * BottomSheet가 이미 핸들을 그리므로 시트에서는 false.
-   * Dialog로 띄울 때만 true.
-   */
-  showDragHandle?: boolean;
+  headerActions?: ReactNode; // 닫기 왼쪽 — 즐겨찾기·공유 등
+  showBack?: boolean; // 모바일 시트에서 목록으로 돌아가는 뒤로가기
+  showDragHandle?: boolean; // 드래그 핸들 바. BottomSheet가 이미 그리면 false, Dialog로 띄울 때만 true
 };
 
 export function PlaceDetail({

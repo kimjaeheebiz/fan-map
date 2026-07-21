@@ -576,7 +576,7 @@ export default function GuideUiPage() {
       </GuideSection>
 
       <GuideSection id="table" title="Table">
-        <div className="border-border overflow-hidden rounded-xl border">
+        <div className="border-border overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>

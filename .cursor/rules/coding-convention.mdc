@@ -1,0 +1,31 @@
+---
+description: 주석·모듈 분리·radius 코딩 컨벤션 (docs/CODING_CONVENTION.md)
+alwaysApply: true
+---
+
+# 코딩 컨벤션
+
+상세: `docs/CODING_CONVENTION.md`. 코드 작성·수정 시 준수.
+
+## 주석
+
+- 문체: 명사구·규칙 중심. `~합니다`/`~한다` 지양
+- 지양: 필드명 반복, 작업 메모, 변경 가능 API·스펙·구현 상세
+- 인계: `TODO:` 최소 기재
+- `/** */`: export 대상(`type`/`interface`/`const`/컴포넌트) 바로 위 1줄
+- `//`: 목록형 선언(interface, type, Props, enum) **항목 우측**. 맥락·제약·용도
+
+## 파일·모듈
+
+- 단일 사용처 상수·헬퍼 → 사용처 인라인
+- 다중 사용·복잡도 증가 → 함수·파일 분리
+- 미사용 파일·빈 디렉터리 → 제거
+- mock 소량 → API 본문 임시 반환 / 대량 → 파일 분리 / 전환 플래그 미도입
+
+## Border radius
+
+- 기준: `config/app.ts` `radius` → `--radius`
+- 화면에서 패널·카드용 `rounded-*` 임의 지정 금지
+- 블럭: `rounded-lg` (Card, Dialog, Table, Sonner, 팝오버)
+- 개별 요소: `rounded-md` (Input, Textarea, Select, Button, Badge, 이미지·썸네일 래퍼)
+- 원형: `rounded-full` / 풀블리드: `rounded-none`

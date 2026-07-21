@@ -21,10 +21,8 @@ type FormFieldProps<T extends FieldValues> = {
   control: Control<T>;
   name: FieldPath<T>;
   label?: string;
-  /** true면 라벨 옆에 필수 표시(*) */
-  required?: boolean;
-  /** 라벨 옆 ? 아이콘 툴팁 */
-  tooltip?: ReactNode;
+  required?: boolean; // true면 라벨 옆에 필수 표시(*)
+  tooltip?: ReactNode; // 라벨 옆 ? 아이콘 툴팁
   description?: string;
   className?: string;
   children: (field: ControllerRenderProps<T, FieldPath<T>>) => ReactNode;

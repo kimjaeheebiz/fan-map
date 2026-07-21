@@ -28,7 +28,7 @@ export function PlaceImageGallery({
           src={src}
           alt=""
           className={cn(
-            "bg-muted h-44 w-64 shrink-0 snap-start rounded-xl object-cover",
+            "bg-muted h-44 w-64 shrink-0 snap-start rounded-md object-cover",
             imageClassName,
           )}
         />

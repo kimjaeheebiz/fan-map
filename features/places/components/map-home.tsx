@@ -262,7 +262,7 @@ export function MapHome() {
           />
         </div>
         <Separator />
-        <ScrollArea className="min-h-0 flex-1">
+        <ScrollArea className="bg-canvas min-h-0 flex-1">
           {displayPlaces.length === 0 ? (
             <EmptyState
               title={emptyState.title}

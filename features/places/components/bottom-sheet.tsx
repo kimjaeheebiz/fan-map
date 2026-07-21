@@ -36,8 +36,7 @@ export function SheetDragArea({
 }: {
   children?: ReactNode;
   className?: string;
-  /** 얇은 핸들 바용 */
-  asHandle?: boolean;
+  asHandle?: boolean; // 얇은 핸들 바용
 }) {
   const drag = useContext(SheetDragContext);
 
@@ -230,7 +229,7 @@ export function BottomSheet({
     <SheetDragContext.Provider value={dragHandlers}>
       <div
         className={cn(
-          "bg-popover flex flex-col overflow-hidden rounded-t-2xl border border-b-0 shadow-xl ring-border/20",
+          "bg-popover flex flex-col overflow-hidden rounded-t-lg border border-b-0 shadow-xl ring-1 ring-foreground/5 dark:ring-foreground/10",
           !dragging &&
             "transition-[height,opacity,transform] duration-300 ease-out",
           closing

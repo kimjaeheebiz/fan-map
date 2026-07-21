@@ -11,7 +11,12 @@ import { getSportName } from "@/features/catalog/constants";
 import { useFavoritePlaceIds } from "@/features/places/hooks/use-favorite-place-ids";
 import type { Place } from "@/features/places/types";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 type PlaceListProps = {
@@ -20,6 +25,7 @@ type PlaceListProps = {
   onSelectPlace: (placeId: string) => void;
 };
 
+/** 장소 목록 — 카드형 */
 export function PlaceList({
   places,
   selectedPlaceId,
@@ -28,60 +34,62 @@ export function PlaceList({
   const { isFavorite, toggleFavorite } = useFavoritePlaceIds();
 
   return (
-    <div className="flex flex-col">
-      {places.map((place, index) => {
+    <div className="flex flex-col gap-2 p-3">
+      {places.map((place) => {
         const cover = getCoverImageUrl(place);
-        const sports = getPlaceSportIds(place)
-          .map(getSportName)
-          .join(" · ");
+        const sports = getPlaceSportIds(place).map(getSportName).join(" · ");
         const selected = place.id === selectedPlaceId;
         const favorited = isFavorite(place.id);
 
         return (
-          <div key={place.id}>
-            {index > 0 && <Separator />}
-            <div
-              className={cn(
-                "hover:bg-muted/60 flex w-full items-stretch gap-1 px-2 py-1",
-                selected && "bg-muted",
-              )}
-            >
-              <Button
-                type="button"
-                variant="ghost"
-                aria-pressed={selected}
-                onClick={() => onSelectPlace(place.id)}
-                className="h-auto min-w-0 flex-1 justify-start gap-3 rounded-md px-2 py-2 text-left whitespace-normal"
-              >
-                <div className="bg-muted size-14 shrink-0 overflow-hidden rounded-md">
-                  {cover ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={cover}
-                      alt=""
-                      className="size-full object-cover"
-                    />
-                  ) : null}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate">{place.name}</p>
-                  <p className="text-muted-foreground truncate text-xs">
-                    {place.address}
-                  </p>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    제보 {getReportCount(place)}
-                    {sports ? ` · ${sports}` : ""}
-                  </p>
-                </div>
-              </Button>
-
+          <Card
+            key={place.id}
+            size="sm"
+            role="button"
+            tabIndex={0}
+            aria-pressed={selected}
+            onClick={() => onSelectPlace(place.id)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onSelectPlace(place.id);
+              }
+            }}
+            className={cn(
+              "cursor-pointer gap-0 py-0 shadow-xs ring-0 transition-[box-shadow]",
+              selected
+                ? "relative shadow-md before:bg-primary before:absolute before:inset-y-5 before:left-1 before:w-0.75 before:rounded-full"
+                : "hover:shadow-md",
+            )}
+          >
+            <CardHeader className="relative flex flex-row items-start gap-3 py-3">
+              <div className="bg-muted size-16 shrink-0 overflow-hidden rounded-md">
+                {cover ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={cover}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1 pr-8">
+                <CardTitle className="truncate text-sm">{place.name}</CardTitle>
+                <CardDescription className="truncate text-xs">
+                  {place.address}
+                </CardDescription>
+                <CardDescription className="mt-1 text-xs">
+                  제보 {getReportCount(place)}
+                  {sports ? ` · ${sports}` : ""}
+                </CardDescription>
+              </div>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon-sm"
                 aria-label={favorited ? "즐겨찾기 해제" : "즐겨찾기 추가"}
                 aria-pressed={favorited}
-                className="mt-2 shrink-0 self-start"
+                className="absolute top-2 right-2"
                 onClick={(event) => {
                   event.stopPropagation();
                   const next = toggleFavorite(place.id);
@@ -101,8 +109,8 @@ export function PlaceList({
                   )}
                 />
               </Button>
-            </div>
-          </div>
+            </CardHeader>
+          </Card>
         );
       })}
     </div>

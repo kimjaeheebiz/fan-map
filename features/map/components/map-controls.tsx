@@ -9,8 +9,7 @@ type MapControlsProps = {
   onResearch: () => void;
   locateLoading?: boolean;
   researchDisabled?: boolean;
-  /** 모바일 시트 높이(px). 있으면 컨트롤을 시트 바로 위에 배치 */
-  sheetBottomOffset?: number;
+  sheetBottomOffset?: number; // 모바일 시트 높이(px). 있으면 컨트롤을 시트 바로 위에 배치
 };
 
 export function MapControls({

@@ -29,6 +29,7 @@ export type NaverMap = {
   setCenter: (latlng: NaverLatLng) => void;
   setZoom: (zoom: number) => void;
   getCenter: () => NaverLatLng;
+  getZoom: () => number;
   getBounds: () => NaverLatLngBounds;
   destroy?: () => void;
 };
@@ -47,6 +48,8 @@ export type NaverMapsNamespace = {
     options?: {
       center?: NaverLatLng;
       zoom?: number;
+      gl?: boolean; // GL 벡터맵 활성화 (Style Editor 커스텀 스타일용)
+      customStyleId?: string; // Style Editor My Style ID
     },
   ) => NaverMap;
   Marker: new (options: {

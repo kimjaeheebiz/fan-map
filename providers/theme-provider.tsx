@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
-import { appConfig, type AppConfig, type ThemeMode } from "@/config/app";
+import { appConfig, type AppConfig } from "@/config/app";
 import { layoutTokens } from "@/config/theme-tokens";
 import { applyThemeTokens } from "@/lib/apply-theme";
 
@@ -16,15 +16,6 @@ const AppConfigContext = React.createContext<AppConfigContextValue | null>(
   null,
 );
 
-function resolveScheme(
-  theme: ThemeMode,
-  resolvedTheme: string | undefined,
-): "light" | "dark" {
-  if (theme === "dark") return "dark";
-  if (theme === "light") return "light";
-  return resolvedTheme === "dark" ? "dark" : "light";
-}
-
 export function useAppConfig() {
   const ctx = React.useContext(AppConfigContext);
   if (!ctx) {
@@ -34,27 +25,40 @@ export function useAppConfig() {
 }
 
 function ThemeConfigBridge({ children }: { children: React.ReactNode }) {
-  const { resolvedTheme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const [config, setConfigState] = React.useState<AppConfig>(appConfig);
+  const didApplyAppTheme = React.useRef(false);
 
-  const setConfig = React.useCallback((patch: Partial<AppConfig>) => {
-    setConfigState((prev) => ({ ...prev, ...patch }));
-  }, []);
+  // app.ts 기본 테마를 최초 1회 반영 (localStorage보다 config 우선)
+  React.useEffect(() => {
+    if (didApplyAppTheme.current) return;
+    didApplyAppTheme.current = true;
+    setTheme(appConfig.theme);
+    setConfigState((prev) =>
+      prev.theme === appConfig.theme ? prev : { ...prev, theme: appConfig.theme },
+    );
+  }, [setTheme]);
+
+  const setConfig = React.useCallback(
+    (patch: Partial<AppConfig>) => {
+      if (patch.theme != null) {
+        setTheme(patch.theme);
+      }
+      setConfigState((prev) => ({ ...prev, ...patch }));
+    },
+    [setTheme],
+  );
 
   const resetConfig = React.useCallback(() => {
+    setTheme(appConfig.theme);
     setConfigState(appConfig);
-  }, []);
+  }, [setTheme]);
 
   React.useEffect(() => {
-    setTheme(config.theme);
-  }, [config.theme, setTheme]);
-
-  React.useEffect(() => {
-    const scheme = resolveScheme(config.theme, resolvedTheme);
     applyThemeTokens({
       primaryColor: config.primaryColor,
       radius: config.radius,
-      scheme,
+      scheme: config.theme,
     });
 
     const root = document.documentElement;
@@ -68,7 +72,7 @@ function ThemeConfigBridge({ children }: { children: React.ReactNode }) {
     root.dataset.layout = config.layout;
     root.dataset.sidebar = config.sidebar;
     root.dataset.header = config.header;
-  }, [config, resolvedTheme]);
+  }, [config]);
 
   const value = React.useMemo(
     () => ({ config, setConfig, resetConfig }),
@@ -85,8 +89,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <NextThemesProvider
       attribute="class"
       defaultTheme={appConfig.theme}
-      enableSystem
+      enableSystem={false}
       disableTransitionOnChange
+      storageKey="fan-map-theme"
     >
       <ThemeConfigBridge>{children}</ThemeConfigBridge>
     </NextThemesProvider>

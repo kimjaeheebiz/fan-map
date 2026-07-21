@@ -21,7 +21,7 @@
 | `EmptyState` | 빈 상태 |
 | `Loading` | 로딩 표시 |
 | `AppSkeleton` / `Skeleton` | 스켈레톤 |
-| `ThemeSwitcher` | 헤더: Light↔Dark 토글 / `variant="group"`: Light·Dark·System |
+| `ThemeSwitcher` | 헤더: Light↔Dark 토글 / `variant="group"`: Light·Dark |
 | `NotificationButton` | 알림 드롭다운 (목 데이터) |
 | `UserMenu` | 아바타 · 계정 정보 · 마이 페이지 · 로그아웃 |
 

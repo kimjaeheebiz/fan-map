@@ -7,21 +7,21 @@ import {
   type SheetSnap,
 } from "@/features/places/components/bottom-sheet";
 import type { Place } from "@/features/places/types";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 type PlacePanelProps = {
   place: Place;
   onClose: () => void;
   onReport?: () => void;
-  /** 닫기 왼쪽 — 즐겨찾기·공유 등 */
-  headerActions?: ReactNode;
-  /** PC: 목록 옆 떠 있는 모달 / Mobile: 하단 시트 */
-  variant?: "sidebar" | "sheet";
+  headerActions?: ReactNode; // 닫기 왼쪽 — 즐겨찾기·공유 등
+  variant?: "sidebar" | "sheet"; // PC: 목록 옆 떠 있는 모달 / Mobile: 하단 시트
   onSnapChange?: (snap: SheetSnap) => void;
   onHeightChange?: (height: number) => void;
   className?: string;
 };
 
+/** 장소 상세 패널 — PC 사이드 카드 / 모바일 시트 */
 export function PlacePanel({
   place,
   onClose,
@@ -34,9 +34,9 @@ export function PlacePanel({
 }: PlacePanelProps) {
   if (variant === "sidebar") {
     return (
-      <div
+      <Card
         className={cn(
-          "bg-popover flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border shadow-xl ring-border/20",
+          "bg-popover flex h-full min-h-0 flex-col gap-0 overflow-hidden border py-0 shadow-xl",
           "animate-in fade-in zoom-in-95 slide-in-from-left-2 duration-200",
           className,
         )}
@@ -48,7 +48,7 @@ export function PlacePanel({
           headerActions={headerActions}
           showDragHandle={false}
         />
-      </div>
+      </Card>
     );
   }
 

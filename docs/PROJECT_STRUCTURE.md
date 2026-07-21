@@ -24,6 +24,8 @@ providers/         # Theme, Query, AppProviders
 docs/              # 문서
 ```
 
+주요 문서: [CODING_CONVENTION](./CODING_CONVENTION.md) · [DEVELOPMENT_GUIDE](./DEVELOPMENT_GUIDE.md) · [COMPONENT_GUIDE](./COMPONENT_GUIDE.md) · [THEME_GUIDE](./THEME_GUIDE.md)
+
 ## 라우트 그룹
 
 | 그룹 | Layout | 페이지 |

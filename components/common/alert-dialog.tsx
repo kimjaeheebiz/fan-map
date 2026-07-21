@@ -19,8 +19,7 @@ type AlertDialogProps = {
   title: string;
   description?: string;
   confirmLabel?: string;
-  /** 버튼 강조 색 */
-  variant?: "default" | "destructive";
+  variant?: "default" | "destructive"; // 버튼 강조 색
   size?: VariantProps<typeof dialogContentVariants>["size"];
   children?: ReactNode;
 };

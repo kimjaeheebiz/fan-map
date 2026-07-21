@@ -115,7 +115,7 @@ export default function GuideThemePage() {
         <SettingCard
           title="테마 모드"
           code="theme"
-          description="light / dark / system"
+          description="light / dark"
         >
           <ThemeSwitcher variant="group" />
         </SettingCard>

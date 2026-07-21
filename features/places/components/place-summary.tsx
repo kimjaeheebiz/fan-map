@@ -22,7 +22,7 @@ export function PlaceSummary({ place, onOpenDetail }: PlaceSummaryProps) {
   return (
     <Card
       size="sm"
-      className="rounded-b-none rounded-t-2xl shadow-lg ring-border/20"
+      className="rounded-b-none shadow-lg"
     >
       <CardHeader className="flex-row items-start gap-3">
         <div className="bg-muted size-16 shrink-0 overflow-hidden rounded-md">

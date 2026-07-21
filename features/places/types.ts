@@ -9,16 +9,14 @@ export type SportTeamSet = {
 export type ViewingReport = {
   id: string;
   placeId: string;
-  /** 종목·팀 세트 (1개 이상). 종목별로 팀을 묶음 */
-  sportTeams: SportTeamSet[];
+  sportTeams: SportTeamSet[]; // 종목·팀 세트 (1개 이상). 종목별로 팀을 묶음
   watchedAt: string;
   review: string;
   tagIds?: string[];
   hasScreen?: boolean;
   hasSound?: boolean;
   goodForGroup?: boolean;
-  /** Base64 data URL only (max 5) */
-  images: string[];
+  images: string[]; // Base64 data URL only (max 5)
   createdAt: string;
 };
 
@@ -32,8 +30,7 @@ export type Place = {
   phone?: string;
   categoryName?: string;
   naverMapUrl?: string;
-  /** 대표 이미지. 비어 있으면 첫 제보 images[0] 사용 */
-  coverImageUrl?: string;
+  coverImageUrl?: string; // 대표 이미지. 비어 있으면 첫 제보 images[0] 사용
   reports: ViewingReport[];
   createdAt: string;
 };

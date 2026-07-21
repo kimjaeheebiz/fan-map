@@ -27,8 +27,7 @@ import type { PlaceSearchResult } from "@/features/places/types/naver-local-sear
 type ReportDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** 기존 Place에 바로 제보할 때 */
-  initialPlace?: Place | null;
+  initialPlace?: Place | null; // 기존 Place에 바로 제보할 때
   onSubmitted?: (place: Place) => void;
 };
 

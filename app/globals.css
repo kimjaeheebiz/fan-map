@@ -65,7 +65,7 @@
 }
 
 /*
-  Preset b1aIcEaeG 토큰 기준
+  Preset b1aIcEaeG 토큰 기준 -> 커스터마이징
   - background: 흰색 면 (Tabs active, Switch thumb, Outline 버튼 등)
   - canvas: 전체 레이아웃 배경 (회색)
   - card / sidebar: 흰색 면
@@ -99,7 +99,7 @@
   --wait-foreground: var(--background);
   --border: #e5e5e5;
   --input: #e5e5e5;
-  --ring: #a1a1a1;
+  --ring: var(--primary);
   --chart-1: #ffb8cb;
   --chart-2: #ff6b8a;
   --chart-3: #ff3d6d;
@@ -113,7 +113,7 @@
   --sidebar-accent: #f5f5f5;
   --sidebar-accent-foreground: #171717;
   --sidebar-border: #e5e5e5;
-  --sidebar-ring: #a1a1a1;
+  --sidebar-ring: var(--primary);
 
   --app-sidebar-width: 16rem;
   --app-header-height: 3.5rem;
@@ -148,7 +148,7 @@
   --wait-foreground: var(--background);
   --border: #ffffff1a;
   --input: #ffffff26;
-  --ring: #737373;
+  --ring: var(--primary);
   --chart-1: #ffc2d1;
   --chart-2: #ff7a97;
   --chart-3: #ff4d78;
@@ -161,7 +161,7 @@
   --sidebar-accent: #262626;
   --sidebar-accent-foreground: #fafafa;
   --sidebar-border: #ffffff1a;
-  --sidebar-ring: #737373;
+  --sidebar-ring: var(--primary);
 }
 
 @layer base {

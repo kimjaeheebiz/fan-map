@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAppConfig } from "@/providers/theme-provider";
 import type { ThemeMode } from "@/config/app";
@@ -11,12 +11,11 @@ import { cn } from "@/lib/utils";
 const modes: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
   { value: "light", label: "light", icon: Sun },
   { value: "dark", label: "dark", icon: Moon },
-  { value: "system", label: "system", icon: Monitor },
 ];
 
 /**
  * variant="toggle" — 헤더용 단일 아이콘 (light ↔ dark)
- * variant="group" — 라이트 / 다크 / 시스템 버튼 그룹 (가이드용)
+ * variant="group" — 라이트 / 다크 버튼 그룹 (가이드용)
  */
 export function ThemeSwitcher({
   className,
@@ -34,14 +33,14 @@ export function ThemeSwitcher({
 
 function ThemeModeToggle({ className }: { className?: string }) {
   const { resolvedTheme } = useTheme();
-  const { setConfig } = useAppConfig();
+  const { config, setConfig } = useAppConfig();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  const isDark = mounted && resolvedTheme === "dark";
+  const isDark = mounted && (config.theme === "dark" || resolvedTheme === "dark");
 
   return (
     <Button

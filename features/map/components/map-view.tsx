@@ -7,6 +7,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTheme } from "next-themes";
+import { NAVER_MAP_DARK_STYLE_ID } from "@/features/map/constants";
 import { loadNaverMapsSdk } from "@/features/map/lib/load-naver-sdk";
 import {
   createPlaceMarkerIcon,
@@ -52,10 +54,24 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
     const markersRef = useRef<Map<string, NaverMarker>>(new Map());
     const onSelectRef = useRef(onSelectPlace);
     const onMapReadyRef = useRef(onMapReady);
+    const viewStateRef = useRef<{ lat: number; lng: number; zoom: number }>({
+      lat: DEFAULT_MAP_CENTER.lat,
+      lng: DEFAULT_MAP_CENTER.lng,
+      zoom: DEFAULT_MAP_CENTER.zoom,
+    });
+    const { resolvedTheme } = useTheme();
+    const [themeReady, setThemeReady] = useState(false);
     const [status, setStatus] = useState<"loading" | "ready" | "error">(
       "loading",
     );
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const mapScheme =
+      themeReady && resolvedTheme === "dark" ? "dark" : "light";
+
+    useEffect(() => {
+      setThemeReady(true);
+    }, []);
 
     useEffect(() => {
       onSelectRef.current = onSelectPlace;
@@ -65,6 +81,15 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
       onMapReadyRef.current = onMapReady;
     }, [onMapReady]);
 
+    function rememberViewState(map: NaverMap) {
+      const center = map.getCenter();
+      viewStateRef.current = {
+        lat: center.lat(),
+        lng: center.lng(),
+        zoom: map.getZoom(),
+      };
+    }
+
     useImperativeHandle(ref, () => ({
       panTo(lat, lng, zoom) {
         if (!mapRef.current || !window.naver?.maps) return;
@@ -73,6 +98,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
         if (typeof zoom === "number") {
           mapRef.current.setZoom(zoom);
         }
+        rememberViewState(mapRef.current);
       },
       getBounds() {
         if (!mapRef.current) return null;
@@ -89,6 +115,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
     }));
 
     useEffect(() => {
+      if (!themeReady) return;
+
       let cancelled = false;
 
       async function init() {
@@ -97,15 +125,25 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
           if (cancelled || !containerRef.current || !window.naver?.maps) return;
 
           const { maps } = window.naver;
-          const center = new maps.LatLng(
-            DEFAULT_MAP_CENTER.lat,
-            DEFAULT_MAP_CENTER.lng,
-          );
+          const { lat, lng, zoom } = viewStateRef.current;
+
+          markersRef.current.forEach((marker) => marker.setMap(null));
+          markersRef.current.clear();
+          mapRef.current?.destroy?.();
+          mapRef.current = null;
+
           const map = new maps.Map(containerRef.current, {
-            center,
-            zoom: DEFAULT_MAP_CENTER.zoom,
+            center: new maps.LatLng(lat, lng),
+            zoom,
+            gl: true,
+            ...(mapScheme === "dark"
+              ? { customStyleId: NAVER_MAP_DARK_STYLE_ID }
+              : {}),
           });
           mapRef.current = map;
+          maps.Event.addListener(map, "idle", () => {
+            if (mapRef.current) rememberViewState(mapRef.current);
+          });
           setStatus("ready");
           onMapReadyRef.current?.();
         } catch (error) {
@@ -119,16 +157,18 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
         }
       }
 
+      setStatus((current) => (current === "ready" ? current : "loading"));
       void init();
 
       return () => {
         cancelled = true;
+        if (mapRef.current) rememberViewState(mapRef.current);
         markersRef.current.forEach((marker) => marker.setMap(null));
         markersRef.current.clear();
         mapRef.current?.destroy?.();
         mapRef.current = null;
       };
-    }, []);
+    }, [mapScheme, themeReady]);
 
     useEffect(() => {
       if (status !== "ready" || !mapRef.current || !window.naver?.maps) return;

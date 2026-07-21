@@ -1,5 +1,7 @@
 # 개발 가이드
 
+코딩 컨벤션(주석·모듈 분리): [CODING_CONVENTION.md](./CODING_CONVENTION.md)
+
 ## 메뉴 노출
 
 `config/navigation.ts`에서 관리합니다. **기본은 노출**, 숨길 때만 `hidden: true`를 추가합니다.

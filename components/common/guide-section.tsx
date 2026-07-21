@@ -33,7 +33,7 @@ export function GuideNav({
   items: { id: string; label: string }[];
 }) {
   return (
-    <nav className="bg-muted/40 mb-6 flex flex-wrap gap-2 rounded-xl p-3">
+    <nav className="bg-muted/40 mb-6 flex flex-wrap gap-2 rounded-lg p-3 border">
       {items.map((item) => (
         <a
           key={item.id}

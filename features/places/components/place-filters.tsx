@@ -29,7 +29,7 @@ export function PlaceFilters({ filters, onChange, className }: PlaceFiltersProps
   return (
     <HorizontalScroll
       className={className}
-      contentClassName="gap-1 pb-0.5"
+      contentClassName="gap-1"
       scrollRatio={0.55}
     >
       <FilterChip
