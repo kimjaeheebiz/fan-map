@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <span>{appConfig.name}</span>
         </Link>
         <p className="text-muted-foreground">
-          스포츠 관람 장소 지도
+          응원·방문 장소 지도
         </p>
       </div>
       <Card className="w-full max-w-md gap-0 py-0">

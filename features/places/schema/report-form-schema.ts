@@ -19,7 +19,7 @@ export const reportFormSchema = z.object({
   sportTeams: z
     .array(sportTeamSetSchema)
     .min(1, "종목을 하나 이상 추가해 주세요."),
-  watchedAt: z.string().min(1, "관람일을 선택해 주세요."),
+  watchedAt: z.string().min(1, "방문일을 선택해 주세요."),
   review: z
     .string()
     .trim()

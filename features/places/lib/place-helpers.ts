@@ -1,6 +1,9 @@
-import { teams } from "@/features/catalog/constants";
+import { sports, teams } from "@/features/catalog/constants";
 import type { SportId } from "@/features/catalog/types";
 import type { Place, SportTeamSet, ViewingReport } from "@/features/places/types";
+import { formatDate } from "@/lib/format-date";
+
+const sportCatalogOrder = new Map(sports.map((sport) => [sport.id, sport.order]));
 
 /** reports는 최신순(앞이 최신)으로 유지한다. */
 export function getReportCount(place: Place) {
@@ -59,9 +62,8 @@ export function getPlaceSportIds(place: Place) {
   ];
 }
 
-export function getPrimarySportId(place: Place): SportId | null {
-  if (place.reports.length === 0) return null;
-
+/** 종목 순위: 제보 수 내림차순 → 동률이면 catalog order */
+export function getPlaceSportsRanked(place: Place) {
   const counts = new Map<SportId, number>();
   for (const report of place.reports) {
     for (const sportId of getReportSportIds(report)) {
@@ -69,15 +71,34 @@ export function getPrimarySportId(place: Place): SportId | null {
     }
   }
 
-  let primary: SportId | null = null;
-  let max = 0;
-  for (const [sportId, count] of counts) {
-    if (count > max) {
-      max = count;
-      primary = sportId;
-    }
+  return [...counts.entries()]
+    .map(([sportId, count]) => ({ sportId, count }))
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return (
+        (sportCatalogOrder.get(a.sportId) ?? 99) -
+        (sportCatalogOrder.get(b.sportId) ?? 99)
+      );
+    });
+}
+
+/**
+ * 지도 핀용 종목.
+ * 활성 종목 필터가 있고 장소에 포함되면 필터 종목, 아니면 ranked 1위.
+ */
+export function getDisplaySportId(
+  place: Place,
+  activeFilterSportId?: SportId | null,
+): SportId | null {
+  const ranked = getPlaceSportsRanked(place);
+  if (ranked.length === 0) return null;
+  if (
+    activeFilterSportId &&
+    ranked.some((entry) => entry.sportId === activeFilterSportId)
+  ) {
+    return activeFilterSportId;
   }
-  return primary;
+  return ranked[0].sportId;
 }
 
 export function getTeamDistribution(place: Place) {
@@ -108,15 +129,80 @@ export function sportTeamsFromFlat(
   }));
 }
 
-const sportEmoji: Record<SportId, string> = {
-  baseball: "⚾",
-  soccer: "⚽",
-  basketball: "🏀",
-  volleyball: "🏐",
-  esports: "🎮",
-  other: "🏟️",
-};
+/** 오늘 0시 이후 생성된 제보 수 */
+export function getTodayReportCount(place: Place) {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  return place.reports.filter(
+    (report) => new Date(report.createdAt).getTime() >= start.getTime(),
+  ).length;
+}
 
-export function getSportEmoji(sportId: SportId) {
-  return sportEmoji[sportId];
+/** 최근 N일 제보 수 */
+export function getRecentReportCount(place: Place, days = 14) {
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  return place.reports.filter(
+    (report) => new Date(report.createdAt).getTime() >= cutoff,
+  ).length;
+}
+
+export function formatRelativeTime(iso: string) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(diffMs) || diffMs < 0) return iso;
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 1) return "방금";
+  if (mins < 60) return `${mins}분 전`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}시간 전`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}일 전`;
+  return formatDate(iso);
+}
+
+export function getPlaceAmenityFlags(place: Place) {
+  let hasScreen = false;
+  let hasSound = false;
+  let goodForGroup = false;
+  const tagIds = new Set<string>();
+
+  for (const report of place.reports) {
+    if (report.hasScreen) hasScreen = true;
+    if (report.hasSound) hasSound = true;
+    if (report.goodForGroup) goodForGroup = true;
+    for (const tagId of report.tagIds ?? []) tagIds.add(tagId);
+  }
+
+  return {
+    hasScreen,
+    hasSound,
+    goodForGroup,
+    tagIds: [...tagIds],
+  };
+}
+
+export function getTopTeamShortNames(place: Place, limit = 3) {
+  return getTeamDistribution(place)
+    .slice(0, limit)
+    .map(({ teamId }) => {
+      const team = teams.find((entry) => entry.id === teamId);
+      return team?.shortName ?? team?.name ?? teamId;
+    });
+}
+
+/** 목록·상세 Live 요약 */
+export function getPlaceLiveSummary(place: Place) {
+  const todayCount = getTodayReportCount(place);
+  const recentCount = getRecentReportCount(place, 14);
+  const latest = getLatestReport(place);
+  const teamsLabel = getTopTeamShortNames(place).join(" · ");
+  const amenities = getPlaceAmenityFlags(place);
+
+  return {
+    todayCount,
+    recentCount,
+    latestRelative: latest ? formatRelativeTime(latest.createdAt) : null,
+    teamsLabel,
+    amenities,
+    isHot: todayCount > 0 || recentCount >= 2,
+  };
 }

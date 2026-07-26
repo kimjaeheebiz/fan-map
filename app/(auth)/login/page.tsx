@@ -1,83 +1,104 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { KakaoLoginButton } from "@/features/auth/components/kakao-login-button";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { authNav } from "@/config/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FormField } from "@/components/common/form-field";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const loginSchema = z.object({
-  email: z.email("유효한 이메일을 입력해 주세요."),
-  password: z.string().min(6, "비밀번호는 6자 이상이어야 합니다."),
-});
+function safeReturnUrl(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
+  return value;
+}
 
-type LoginValues = z.infer<typeof loginSchema>;
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = safeReturnUrl(searchParams.get("returnUrl"));
+  const { loginWithKakaoMock, prepareKakaoSignup, isAuthenticated, isReady } =
+    useAuth();
+  const [loading, setLoading] = useState(false);
 
-export default function LoginPage() {
-  const { control, handleSubmit } = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
-  });
+  useEffect(() => {
+    if (isReady && isAuthenticated) {
+      router.replace(returnUrl);
+    }
+  }, [isReady, isAuthenticated, returnUrl, router]);
 
-  const onSubmit = handleSubmit(() => {
-    toast.success("로그인 요청이 전송되었습니다. (Mock)");
-  });
+  function handleKakaoLogin() {
+    setLoading(true);
+    try {
+      const result = loginWithKakaoMock();
+      if (result.status === "logged_in") {
+        toast.success("카카오 로그인되었습니다. (Mock)");
+        router.replace(returnUrl);
+        return;
+      }
+
+      toast.message("카카오 동의 완료 — 닉네임을 확인해 주세요. (Mock)");
+      const params = new URLSearchParams({ returnUrl });
+      router.push(`${authNav.signupKakao}?${params.toString()}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleForceSignup() {
+    prepareKakaoSignup();
+    const params = new URLSearchParams({ returnUrl });
+    router.push(`${authNav.signupKakao}?${params.toString()}`);
+  }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold">로그인</h1>
         <p className="text-muted-foreground">
-          이메일과 비밀번호로 로그인해 주세요.
+          카카오 계정으로 빠르게 시작할 수 있어요.
         </p>
       </div>
 
-      <FormField control={control} name="email" label="이메일" required>
-        {(field) => (
-          <Input
-            {...field}
-            id="email"
-            type="email"
-            placeholder="name@example.com"
-            autoComplete="email"
-          />
-        )}
-      </FormField>
+      <KakaoLoginButton onClick={handleKakaoLogin} loading={loading} />
 
-      <FormField control={control} name="password" label="비밀번호" required>
-        {(field) => (
-          <Input
-            {...field}
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            autoComplete="current-password"
-          />
-        )}
-      </FormField>
+      <p className="text-muted-foreground text-center text-xs leading-relaxed">
+        UI 확인용 Mock입니다. 실제 카카오 OAuth는 연동되지 않습니다.
+      </p>
 
-      <div className="flex justify-end">
-        <Link
-          href="/forgot-password"
-          className="text-muted-foreground hover:text-foreground"
-        >
-          비밀번호를 잊으셨나요?
-        </Link>
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="border-border w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-card text-muted-foreground px-2">또는</span>
+        </div>
       </div>
 
-      <Button type="submit" className="w-full">
-        로그인
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={handleForceSignup}
+      >
+        새 계정으로 빠른 가입 체험
       </Button>
 
-      <p className="text-muted-foreground text-center">
-        아직 계정이 없으신가요?{" "}
-        <Link href="/register" className="text-foreground font-medium underline">
-          회원가입
+      <p className="text-muted-foreground text-center text-sm">
+        <Link href="/" className="text-foreground font-medium underline">
+          지도로 돌아가기
         </Link>
       </p>
-    </form>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

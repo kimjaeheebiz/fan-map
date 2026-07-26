@@ -28,7 +28,7 @@ export function MapHomeToolbar({
         value={searchInput}
         onChange={onSearchInputChange}
         onSubmit={onSearchSubmit}
-        placeholder="장소명·지역 검색"
+        placeholder="가게명, 팀, 지역 검색 (예: 잠실, LG)"
         className="max-w-none"
       />
       <PlaceFilters filters={filters} onChange={onFiltersChange} />

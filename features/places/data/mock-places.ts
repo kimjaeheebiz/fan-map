@@ -1,4 +1,4 @@
-﻿import type { Place } from "@/features/places/types";
+import type { Place } from "@/features/places/types";
 
 /** 작은 SVG placeholder (data URL) — UI용 대표/후기 이미지 */
 function placeholderImage(label: string, color: string) {
@@ -26,6 +26,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j01-1",
         placeId: "place-jamsil-01",
+        authorId: "mock-user-1",
+        authorNickname: "잠실응원단",
         sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
         watchedAt: "2026-07-10",
         review: "LG 경기 때 자리 잡고 보기 좋아요. 화면이 커서 좋았습니다.",
@@ -34,11 +36,13 @@ export const mockPlaces: Place[] = [
         hasSound: true,
         goodForGroup: true,
         images: [placeholderImage("후기1", "#2563eb")],
-        createdAt: "2026-07-10T21:00:00.000Z",
+        createdAt: "2026-07-26T10:30:00.000Z",
       },
       {
         id: "report-j01-2",
         placeId: "place-jamsil-01",
+        authorId: "mock-user-2",
+        authorNickname: "야구덕후",
         sportTeams: [{ sportId: "baseball", teamIds: ["doosan-bears"] }],
         watchedAt: "2026-06-20",
         review: "더비 날은 붐비니 일찍 가는 걸 추천합니다.",
@@ -63,6 +67,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j02-1",
         placeId: "place-jamsil-02",
+        authorId: "mock-user-3",
+        authorNickname: "축구팬",
         sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
         watchedAt: "2026-07-05",
         review: "치킨이랑 같이 보기 좋아요. 소리는 작은 편.",
@@ -70,7 +76,7 @@ export const mockPlaces: Place[] = [
         hasScreen: true,
         hasSound: false,
         images: [placeholderImage("치킨", "#b45309")],
-        createdAt: "2026-07-05T20:30:00.000Z",
+        createdAt: "2026-07-26T08:00:00.000Z",
       },
     ],
   },
@@ -88,6 +94,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j03-1",
         placeId: "place-jamsil-03",
+        authorId: "mock-user-4",
+        authorNickname: "직관러",
         sportTeams: [{ sportId: "baseball", teamIds: ["doosan-bears"] }],
         watchedAt: "2026-07-12",
         review: "화면 여러 개라 다른 경기도 같이 볼 수 있어요.",
@@ -96,7 +104,7 @@ export const mockPlaces: Place[] = [
         hasSound: true,
         goodForGroup: true,
         images: [],
-        createdAt: "2026-07-12T21:10:00.000Z",
+        createdAt: "2026-07-26T12:00:00.000Z",
       },
     ],
   },
@@ -113,6 +121,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j04-1",
         placeId: "place-jamsil-04",
+        authorId: "mock-user-1",
+        authorNickname: "잠실응원단",
         sportTeams: [{ sportId: "baseball", teamIds: [] }],
         watchedAt: "2026-06-28",
         review: "좌석이 넓어서 단체로 가기 괜찮았습니다.",
@@ -138,13 +148,15 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j05-1",
         placeId: "place-jamsil-05",
+        authorId: "mock-user-2",
+        authorNickname: "야구덕후",
         sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
         watchedAt: "2026-07-01",
         review: "경기 전후 들르기 좋고, TV로 하이라이트 볼 수 있어요.",
         tagIds: ["quiet"],
         hasScreen: true,
         images: [placeholderImage("라운지", "#64748b")],
-        createdAt: "2026-07-01T18:00:00.000Z",
+        createdAt: "2026-07-25T19:00:00.000Z",
       },
     ],
   },
@@ -162,6 +174,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j06-1",
         placeId: "place-jamsil-06",
+        authorId: "mock-user-3",
+        authorNickname: "축구팬",
         sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
         watchedAt: "2026-07-15",
         review: "응원 소리가 커서 분위기 최고. 자리 예약 추천.",
@@ -189,6 +203,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j07-1",
         placeId: "place-jamsil-07",
+        authorId: "mock-user-4",
+        authorNickname: "직관러",
         sportTeams: [{ sportId: "baseball", teamIds: [] }],
         watchedAt: "2026-05-30",
         review: "식사하면서 보기 좋은 곳. 주말엔 대기 있어요.",
@@ -213,6 +229,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j08-1",
         placeId: "place-jamsil-08",
+        authorId: "mock-user-1",
+        authorNickname: "잠실응원단",
         sportTeams: [{ sportId: "soccer", teamIds: ["fc-seoul"] }],
         watchedAt: "2026-06-14",
         review: "축구도 틀어줍니다. 야구 시즌엔 야구 위주.",
@@ -238,6 +256,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-g01-1",
         placeId: "place-gocheok-01",
+        authorId: "mock-user-2",
+        authorNickname: "야구덕후",
         sportTeams: [{ sportId: "baseball", teamIds: ["kiwoom-heroes"] }],
         watchedAt: "2026-07-08",
         review: "고척 근처에서 키움 경기 보기 딱입니다.",
@@ -263,6 +283,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-g02-1",
         placeId: "place-gocheok-02",
+        authorId: "mock-user-3",
+        authorNickname: "축구팬",
         sportTeams: [{ sportId: "baseball", teamIds: ["kiwoom-heroes"] }],
         watchedAt: "2026-06-22",
         review: "회사 근처에서 퇴근 후 관람하기 좋습니다.",
@@ -287,6 +309,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-g03-1",
         placeId: "place-gocheok-03",
+        authorId: "mock-user-4",
+        authorNickname: "직관러",
         sportTeams: [{ sportId: "baseball", teamIds: [] }],
         watchedAt: "2026-07-03",
         review: "식사 메뉴가 다양하고 화면 시야가 괜찮아요.",
@@ -310,6 +334,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-g04-1",
         placeId: "place-gocheok-04",
+        authorId: "mock-user-1",
+        authorNickname: "잠실응원단",
         sportTeams: [{ sportId: "baseball", teamIds: ["kt-wiz"] }],
         watchedAt: "2026-05-18",
         review: "환승 전에 잠깐 보기 좋은 위치.",
@@ -334,6 +360,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j09-1",
         placeId: "place-jamsil-09",
+        authorId: "mock-user-2",
+        authorNickname: "야구덕후",
         sportTeams: [{ sportId: "baseball", teamIds: ["doosan-bears"] }],
         watchedAt: "2026-07-18",
         review: "경기장 바로 앞이라 경기 후 바로 들르기 좋아요.",
@@ -359,6 +387,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j10-1",
         placeId: "place-jamsil-10",
+        authorId: "mock-user-3",
+        authorNickname: "축구팬",
         sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
         watchedAt: "2026-07-09",
         review: "낮 경기 때 분위기 좋고 조용히 볼 수 있어요.",
@@ -371,6 +401,8 @@ export const mockPlaces: Place[] = [
       {
         id: "report-j10-2",
         placeId: "place-jamsil-10",
+        authorId: "mock-user-4",
+        authorNickname: "직관러",
         sportTeams: [{ sportId: "esports", teamIds: [] }],
         watchedAt: "2026-04-12",
         review: "가끔 e스포츠 중계도 틀어줍니다.",

@@ -42,8 +42,10 @@ export function PlaceListSheet({
       className={className}
     >
       <SheetDragArea className="shrink-0 px-4 pb-2">
-        <p className="text-sm font-medium">주변 관람 장소</p>
-        <p className="text-muted-foreground text-xs">{placeCountLabel}</p>
+        <p className="text-base font-bold tracking-tight">오늘 어디서 응원할까?</p>
+        <p className="text-muted-foreground text-xs">
+          주변 장소 {placeCountLabel}
+        </p>
       </SheetDragArea>
 
       <ScrollArea className="min-h-0 flex-1">

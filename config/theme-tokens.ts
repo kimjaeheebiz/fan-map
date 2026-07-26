@@ -17,16 +17,16 @@ export const primaryColorTokens: Record<
 > = {
   blue: {
     light: {
-      primary: "#1447e6",
-      primaryForeground: "#eff6ff",
-      sidebarPrimary: "#155dfc",
-      sidebarPrimaryForeground: "#eff6ff",
+      primary: "#0057FF",
+      primaryForeground: "#ffffff",
+      sidebarPrimary: "#0057FF",
+      sidebarPrimaryForeground: "#ffffff",
     },
     dark: {
-      primary: "#193cb8",
-      primaryForeground: "#eff6ff",
-      sidebarPrimary: "#2b7fff",
-      sidebarPrimaryForeground: "#eff6ff",
+      primary: "#3B82F6",
+      primaryForeground: "#0a0a0a",
+      sidebarPrimary: "#3B82F6",
+      sidebarPrimaryForeground: "#0a0a0a",
     },
   },
   green: {
@@ -87,15 +87,15 @@ export const primaryColorTokens: Record<
   },
   rose: {
     light: {
-      primary: "#f11650",
-      primaryForeground: "#fff5f7",
-      sidebarPrimary: "#f11650",
-      sidebarPrimaryForeground: "#fff5f7",
+      primary: "#FF2D55",
+      primaryForeground: "#ffffff",
+      sidebarPrimary: "#FF2D55",
+      sidebarPrimaryForeground: "#ffffff",
     },
     dark: {
-      primary: "#ff4d78",
-      primaryForeground: "#2c0610",
-      sidebarPrimary: "#ff4d78",
+      primary: "#FF2D55",
+      primaryForeground: "#ffffff",
+      sidebarPrimary: "#FF4D78",
       sidebarPrimaryForeground: "#2c0610",
     },
   },

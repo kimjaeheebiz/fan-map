@@ -31,21 +31,24 @@ export function ThemeSwitcher({
   return <ThemeModeToggle className={className} />;
 }
 
+const subscribeNoop = () => () => {};
+
 function ThemeModeToggle({ className }: { className?: string }) {
   const { resolvedTheme } = useTheme();
   const { config, setConfig } = useAppConfig();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  // SSR/하이드레이션 불일치 방지 — 클라이언트에서만 실제 테마 아이콘 표시
+  const mounted = React.useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
 
   const isDark = mounted && (config.theme === "dark" || resolvedTheme === "dark");
 
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="secondary"
       size="icon-sm"
       className={className}
       aria-label={isDark ? "라이트 모드로 전환" : "다크 모드로 전환"}

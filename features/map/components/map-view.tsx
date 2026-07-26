@@ -18,6 +18,12 @@ import {
 import type { MapBounds } from "@/features/map/lib/map-bounds";
 import type { NaverMap, NaverMarker } from "@/features/map/types/naver";
 import type { Place } from "@/features/places/types";
+import type { SportId } from "@/features/catalog/types";
+import {
+  getDisplaySportId,
+  getPlaceSportsRanked,
+  getReportCount,
+} from "@/features/places/lib/place-helpers";
 import { DEFAULT_MAP_CENTER } from "@/features/places/data/mock-places";
 import { EmptyState } from "@/components/common/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,6 +38,8 @@ type MapViewProps = {
   places: Place[];
   selectedPlaceId: string | null;
   favoritePlaceIds?: string[];
+  /** 활성 종목 필터 — 핀 아이콘에 반영 */
+  filterSportId?: SportId | null;
   onSelectPlace: (placeId: string, source: "map") => void;
   onMapReady?: () => void;
   className?: string;
@@ -43,6 +51,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
       places,
       selectedPlaceId,
       favoritePlaceIds = [],
+      filterSportId = null,
       onSelectPlace,
       onMapReady,
       className,
@@ -189,7 +198,12 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
         const position = new maps.LatLng(place.lat, place.lng);
         const selected = place.id === selectedPlaceId;
         const favorite = favoriteSet.has(place.id);
-        const icon = createPlaceMarkerIcon(maps, place.id, { favorite });
+        const icon = createPlaceMarkerIcon(maps, place.id, {
+          favorite,
+          sportId: getDisplaySportId(place, filterSportId),
+          reportCount: getReportCount(place),
+          multiSport: getPlaceSportsRanked(place).length > 1,
+        });
         let marker = markersRef.current.get(place.id);
 
         if (!marker) {
@@ -214,7 +228,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
 
       syncMarkerSelection(containerRef.current, selectedPlaceId);
       syncMarkerFavorites(containerRef.current, favoritePlaceIds);
-    }, [places, selectedPlaceId, favoritePlaceIds, status]);
+    }, [places, selectedPlaceId, favoritePlaceIds, filterSportId, status]);
 
     return (
       <div className={cn("relative h-full w-full", className)}>

@@ -18,6 +18,7 @@ import {
   userStatusLabel,
 } from "@/features/users/labels";
 import { getPageMeta, getUserDetailPageMeta } from "@/config/pages";
+import { formatDate } from "@/lib/format-date";
 import { useState } from "react";
 
 export default function UserDetailPage() {
@@ -78,7 +79,7 @@ export default function UserDetailPage() {
           </div>
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">등록일</span>
-            <span>{user.createdAt}</span>
+            <span>{formatDate(user.createdAt)}</span>
           </div>
         </div>
       </PageCard>

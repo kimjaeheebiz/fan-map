@@ -69,7 +69,7 @@ const dialogContentVariants = cva(
         default: "",
         /** 헤더 고정 + 본문 스크롤 */
         scroll:
-          "flex max-h-[min(90dvh,720px)] flex-col gap-0 overflow-hidden p-0",
+          "flex max-h-[min(92dvh,960px)] flex-col gap-0 overflow-hidden p-0",
       },
     },
     defaultVariants: {
@@ -108,10 +108,10 @@ function DialogIconButton({
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="secondary"
       size="icon-sm"
       aria-label={label}
-      className={cn("bg-secondary shrink-0", className)}
+      className={cn("shrink-0", className)}
       {...props}
     >
       {children}
@@ -189,7 +189,7 @@ function DialogScrollLayout({
 
       <header
         className={cn(
-          "flex shrink-0 items-start gap-3 border-b px-4 py-3 sm:px-6 sm:pt-5 sm:pb-4",
+          "flex shrink-0 items-center gap-3 border-b px-4 py-3 sm:px-6 sm:py-4",
           headerClassName
         )}
       >
@@ -212,7 +212,7 @@ function DialogScrollLayout({
           ) : null}
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 pt-0.5">
+        <div className="flex shrink-0 items-center gap-1">
           {headerActions}
           {showCloseButton && onClose ? (
             <DialogHeaderCloseButton

@@ -6,7 +6,7 @@ import {
   BottomSheet,
   type SheetSnap,
 } from "@/features/places/components/bottom-sheet";
-import type { Place } from "@/features/places/types";
+import type { Place, ViewingReport } from "@/features/places/types";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -14,8 +14,9 @@ type PlacePanelProps = {
   place: Place;
   onClose: () => void;
   onReport?: () => void;
-  headerActions?: ReactNode; // 닫기 왼쪽 — 즐겨찾기·공유 등
-  variant?: "sidebar" | "sheet"; // PC: 목록 옆 떠 있는 모달 / Mobile: 하단 시트
+  onEditReport?: (report: ViewingReport) => void;
+  headerActions?: ReactNode;
+  variant?: "sidebar" | "sheet";
   onSnapChange?: (snap: SheetSnap) => void;
   onHeightChange?: (height: number) => void;
   className?: string;
@@ -26,6 +27,7 @@ export function PlacePanel({
   place,
   onClose,
   onReport,
+  onEditReport,
   headerActions,
   variant = "sheet",
   onSnapChange,
@@ -45,6 +47,7 @@ export function PlacePanel({
           place={place}
           onClose={onClose}
           onReport={onReport}
+          onEditReport={onEditReport}
           headerActions={headerActions}
           showDragHandle={false}
         />
@@ -52,7 +55,6 @@ export function PlacePanel({
     );
   }
 
-  // BottomSheet가 상단 드래그 핸들을 그리므로 PlaceDetail showDragHandle은 false
   return (
     <BottomSheet
       defaultSnap="half"
@@ -66,6 +68,7 @@ export function PlacePanel({
         place={place}
         onClose={onClose}
         onReport={onReport}
+        onEditReport={onEditReport}
         headerActions={headerActions}
         showBack
         showDragHandle={false}

@@ -9,6 +9,8 @@ export type SportTeamSet = {
 export type ViewingReport = {
   id: string;
   placeId: string;
+  authorId: string;
+  authorNickname: string;
   sportTeams: SportTeamSet[]; // 종목·팀 세트 (1개 이상). 종목별로 팀을 묶음
   watchedAt: string;
   review: string;

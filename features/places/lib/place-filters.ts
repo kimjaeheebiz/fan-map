@@ -1,8 +1,10 @@
 import type { SportId } from "@/features/catalog/types";
+import { getSportName, teams } from "@/features/catalog/constants";
 import type { Place } from "@/features/places/types";
 import {
   getLatestReport,
   getPlaceSportIds,
+  getReportTeamIds,
 } from "@/features/places/lib/place-helpers";
 
 /** 최근 관람 제보 기준일 수 (PoC) */
@@ -33,12 +35,38 @@ export function hasRecentReport(
   return diffMs <= withinDays * 24 * 60 * 60 * 1000;
 }
 
+function getPlaceSearchTokens(place: Place) {
+  const tokens = new Set<string>();
+
+  for (const value of [place.name, place.address, place.categoryName]) {
+    if (value) tokens.add(value);
+  }
+
+  for (const sportId of getPlaceSportIds(place)) {
+    tokens.add(getSportName(sportId));
+  }
+
+  for (const report of place.reports) {
+    for (const teamId of getReportTeamIds(report)) {
+      const team = teams.find((entry) => entry.id === teamId);
+      if (!team) {
+        tokens.add(teamId);
+        continue;
+      }
+      tokens.add(team.name);
+      if (team.shortName) tokens.add(team.shortName);
+    }
+  }
+
+  return [...tokens];
+}
+
 export function matchesPlaceSearch(place: Place, query: string) {
   const q = query.trim().toLowerCase();
   if (!q) return true;
-  return [place.name, place.address, place.categoryName]
-    .filter(Boolean)
-    .some((value) => value!.toLowerCase().includes(q));
+  return getPlaceSearchTokens(place).some((value) =>
+    value.toLowerCase().includes(q),
+  );
 }
 
 export function filterPlaces(

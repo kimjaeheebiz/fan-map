@@ -6,26 +6,32 @@ import {
   useContext,
   useLayoutEffect,
   useRef,
-  useState,
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Map, PenLine } from "lucide-react";
 import { appConfig } from "@/config/app";
+import { MoreMenu } from "@/components/common/more-menu";
 import { ThemeSwitcher } from "@/components/common/theme-switcher";
+import { UserMenu } from "@/components/common/user-menu";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type RegisterReport = (handler: (() => void) | null) => void;
 
 const MapShellReportContext = createContext<RegisterReport | null>(null);
 
 /**
- * 지도 홈에서 제보 버튼을 MapShell 헤더에 연결한다.
+ * 지도 홈에서 다녀왔어요 버튼을 MapShell 헤더에 연결한다.
  */
 export function useMapShellReportAction(onReport: () => void) {
   const register = useContext(MapShellReportContext);
   const onReportRef = useRef(onReport);
-  onReportRef.current = onReport;
+
+  useLayoutEffect(() => {
+    onReportRef.current = onReport;
+  });
 
   useLayoutEffect(() => {
     if (!register) return;
@@ -39,17 +45,26 @@ type MapShellProps = {
 };
 
 /**
- * Fan Map 지도 전용 레이아웃.
- * 사이드바·푸터 없이 뷰포트 전체 지도를 우선한다.
+ * Fan Map 공통 레이아웃 (지도·마이페이지 등).
+ * 헤더에 다녀왔어요는 상시 노출, 지도가 아닌 화면에서는 지도 버튼도 표시.
  */
 export function MapShell({ children }: MapShellProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const reportHandlerRef = useRef<(() => void) | null>(null);
-  const [hasReportAction, setHasReportAction] = useState(false);
+  const isMapHome = pathname === "/";
 
   const registerReport = useCallback<RegisterReport>((handler) => {
     reportHandlerRef.current = handler;
-    setHasReportAction(handler != null);
   }, []);
+
+  function handleReportClick() {
+    if (reportHandlerRef.current) {
+      reportHandlerRef.current();
+      return;
+    }
+    router.push("/?report=1");
+  }
 
   return (
     <MapShellReportContext.Provider value={registerReport}>
@@ -65,18 +80,36 @@ export function MapShell({ children }: MapShellProps) {
             <span>{appConfig.name}</span>
           </Link>
           <div className="ml-auto flex items-center gap-1">
-            <ThemeSwitcher />
-            {hasReportAction ? (
+            {!isMapHome ? (
               <Button
                 type="button"
-                size="sm"
-                className="ml-1"
-                onClick={() => reportHandlerRef.current?.()}
+                variant="secondary"
+                size="icon-sm"
+                className="sm:h-8 sm:w-auto sm:gap-1.5 sm:px-3"
+                aria-label="지도"
+                render={<Link href="/" />}
+                nativeButton={false}
               >
-                <Plus data-icon="inline-start" />
-                제보
+                <Map className="size-4" />
+                <span className="hidden sm:inline">지도</span>
               </Button>
             ) : null}
+            <Button
+              type="button"
+              size="icon-sm"
+              className={cn(
+                "bg-report text-report-foreground hover:bg-report/90",
+                "sm:h-8 sm:w-auto sm:gap-1.5 sm:px-3",
+              )}
+              aria-label="다녀왔어요"
+              onClick={handleReportClick}
+            >
+              <PenLine className="size-4" />
+              <span className="hidden sm:inline">다녀왔어요</span>
+            </Button>
+            <ThemeSwitcher />
+            <UserMenu />
+            <MoreMenu />
           </div>
         </header>
         <main className="relative min-h-0 flex-1">{children}</main>

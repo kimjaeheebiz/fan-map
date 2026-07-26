@@ -6,6 +6,13 @@ import type { PlaceSearchResult } from "@/features/places/types/naver-local-sear
 
 export const PLACES_STORAGE_KEY = "fan-map:places";
 
+const LEGACY_AUTHORS = [
+  { authorId: "mock-user-1", authorNickname: "잠실응원단" },
+  { authorId: "mock-user-2", authorNickname: "야구덕후" },
+  { authorId: "mock-user-3", authorNickname: "축구팬" },
+  { authorId: "mock-user-4", authorNickname: "직관러" },
+] as const;
+
 export class PlacesStorageError extends Error {
   constructor(
     message: string,
@@ -28,35 +35,58 @@ type LegacyReport = ViewingReport & {
   teamId?: string;
   sportIds?: SportId[];
   teamIds?: string[];
+  authorId?: string;
+  authorNickname?: string;
 };
 
-/** 구버전 필드를 sportTeams 세트로 정규화 */
+function legacyAuthorFor(reportId: string) {
+  let hash = 0;
+  for (let i = 0; i < reportId.length; i += 1) {
+    hash = (hash + reportId.charCodeAt(i)) % LEGACY_AUTHORS.length;
+  }
+  return LEGACY_AUTHORS[hash] ?? LEGACY_AUTHORS[0];
+}
+
+/** 구버전 필드·작성자 누락을 정규화 */
 function normalizeReport(report: LegacyReport): ViewingReport {
+  const author =
+    report.authorId && report.authorNickname
+      ? {
+          authorId: report.authorId,
+          authorNickname: report.authorNickname,
+        }
+      : legacyAuthorFor(report.id);
+
   if (report.sportTeams?.length) {
     return {
       ...report,
+      ...author,
       sportTeams: report.sportTeams,
     };
   }
 
-  const sportIds =
-    report.sportIds?.length
-      ? report.sportIds
-      : report.sportId
-        ? [report.sportId]
-        : [];
-  const teamIds =
-    report.teamIds?.length
-      ? report.teamIds
-      : report.teamId
-        ? [report.teamId]
-        : [];
+  const sportIds = report.sportIds?.length
+    ? report.sportIds
+    : report.sportId
+      ? [report.sportId]
+      : [];
+  const teamIds = report.teamIds?.length
+    ? report.teamIds
+    : report.teamId
+      ? [report.teamId]
+      : [];
 
-  const { sportId: _sportId, teamId: _teamId, sportIds: _sportIds, teamIds: _teamIds, ...rest } =
-    report;
+  const {
+    sportId: _sportId,
+    teamId: _teamId,
+    sportIds: _sportIds,
+    teamIds: _teamIds,
+    ...rest
+  } = report;
 
   return {
     ...rest,
+    ...author,
     sportTeams: sportTeamsFromFlat(sportIds, teamIds),
   };
 }
@@ -120,18 +150,16 @@ export function writePlacesToStorage(places: Place[]) {
 export function seedPlacesIfEmpty(): Place[] {
   const existing = readPlacesFromStorage();
   if (existing) return existing;
-  writePlacesToStorage(mockPlaces);
-  return mockPlaces;
+  const seeded = mockPlaces.map(normalizePlace);
+  writePlacesToStorage(seeded);
+  return seeded;
 }
 
 export function getPlaces(): Place[] {
   return seedPlacesIfEmpty();
 }
 
-export function findPlaceByNaverId(
-  places: Place[],
-  naverPlaceId?: string,
-) {
+export function findPlaceByNaverId(places: Place[], naverPlaceId?: string) {
   if (!naverPlaceId) return undefined;
   return places.find((place) => place.naverPlaceId === naverPlaceId);
 }
@@ -221,4 +249,100 @@ export function addReport(payload: AddReportPayload): Place {
 
   writePlacesToStorage(places);
   return place;
+}
+
+export type UpdateReportPayload = {
+  placeId: string;
+  reportId: string;
+  report: Pick<
+    ViewingReport,
+    "sportTeams" | "watchedAt" | "review" | "tagIds" | "images"
+  > &
+    Partial<
+      Pick<ViewingReport, "hasScreen" | "hasSound" | "goodForGroup">
+    >;
+  /** 본인 제보만 수정 가능 */
+  editorId: string;
+};
+
+export function updateReport(payload: UpdateReportPayload): Place {
+  const places = getPlaces();
+  const place = places.find((entry) => entry.id === payload.placeId);
+  if (!place) {
+    throw new PlacesStorageError("장소를 찾을 수 없습니다.", "invalid");
+  }
+
+  const index = place.reports.findIndex(
+    (report) => report.id === payload.reportId,
+  );
+  if (index < 0) {
+    throw new PlacesStorageError("기록을 찾을 수 없습니다.", "invalid");
+  }
+
+  const current = place.reports[index];
+  if (current.authorId !== payload.editorId) {
+    throw new PlacesStorageError("본인이 남긴 기록만 수정할 수 있습니다.", "invalid");
+  }
+
+  place.reports[index] = {
+    ...current,
+    sportTeams: payload.report.sportTeams,
+    watchedAt: payload.report.watchedAt,
+    review: payload.report.review,
+    tagIds: payload.report.tagIds,
+    images: payload.report.images,
+    hasScreen: payload.report.hasScreen ?? current.hasScreen,
+    hasSound: payload.report.hasSound ?? current.hasSound,
+    goodForGroup: payload.report.goodForGroup ?? current.goodForGroup,
+  };
+
+  writePlacesToStorage(places);
+  return place;
+}
+
+export type DeleteReportPayload = {
+  placeId: string;
+  reportId: string;
+  /** 본인 제보만 삭제 가능 */
+  editorId: string;
+};
+
+export function deleteReport(payload: DeleteReportPayload): Place {
+  const places = getPlaces();
+  const place = places.find((entry) => entry.id === payload.placeId);
+  if (!place) {
+    throw new PlacesStorageError("장소를 찾을 수 없습니다.", "invalid");
+  }
+
+  const target = place.reports.find((report) => report.id === payload.reportId);
+  if (!target) {
+    throw new PlacesStorageError("기록을 찾을 수 없습니다.", "invalid");
+  }
+  if (target.authorId !== payload.editorId) {
+    throw new PlacesStorageError("본인이 남긴 기록만 삭제할 수 있습니다.", "invalid");
+  }
+
+  const removedImages = new Set(target.images);
+  place.reports = place.reports.filter((report) => report.id !== payload.reportId);
+
+  if (
+    place.coverImageUrl &&
+    removedImages.has(place.coverImageUrl) &&
+    !place.reports.some((report) => report.images.includes(place.coverImageUrl!))
+  ) {
+    place.coverImageUrl =
+      place.reports.find((report) => report.images[0])?.images[0] ?? undefined;
+  }
+
+  writePlacesToStorage(places);
+  return place;
+}
+
+/** 현재 사용자가 작성한 제보 (장소 정보 포함) */
+export function listReportsByAuthor(authorId: string) {
+  return getPlaces().flatMap((place) =>
+    place.reports
+      .filter((report) => report.authorId === authorId)
+      .map((report) => ({ place, report })),
+  );
 }

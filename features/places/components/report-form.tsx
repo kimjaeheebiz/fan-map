@@ -32,7 +32,7 @@ type ReportFormProps = {
 export function ReportForm({
   placeDraft,
   defaultValues,
-  submitLabel = "제보 등록",
+  submitLabel = "남기기",
   submitting = false,
   onSubmit,
   onBack,
@@ -227,7 +227,7 @@ export function ReportForm({
         )}
       </div>
 
-      <FormField control={control} name="watchedAt" label="관람일" required>
+      <FormField control={control} name="watchedAt" label="방문일" required>
         {(field) => (
           <Input
             id="watchedAt"
@@ -253,7 +253,7 @@ export function ReportForm({
             onChange={field.onChange}
             value={typeof field.value === "string" ? field.value : ""}
             disabled={field.disabled}
-            placeholder="화면, 응원 분위기, 좌석 등 관람 경험을 남겨 주세요."
+            placeholder="분위기, 화면, 좌석 등 다녀온 경험을 남겨 주세요."
           />
         )}
       </FormField>
@@ -285,8 +285,8 @@ export function ReportForm({
       />
 
       <p className="text-muted-foreground text-xs">
-        이 장소에서 경기를 봤어요. 경기별 상영 여부는 달라질 수 있으며, 관람
-        가능 여부는 방문 전 매장에 확인해 주세요.
+        이 장소에 다녀온 경험을 남겨 주세요. 매장 사정은 날마다 달라질 수 있으니
+        방문 전 매장에 확인해 주세요.
       </p>
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
