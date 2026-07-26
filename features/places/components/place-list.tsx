@@ -7,6 +7,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { authNav } from "@/config/navigation";
 import {
   getCoverImageUrl,
+  getActivePlaceEvent,
   getPlaceLiveSummary,
   getPlaceSportsRanked,
   getReportCount,
@@ -14,6 +15,7 @@ import {
 import { getSportName, getTagLabel } from "@/features/catalog/constants";
 import { SportIcon } from "@/features/catalog/sport-icons";
 import { useFavoritePlaceIds } from "@/features/places/hooks/use-favorite-place-ids";
+import { PlaceEventBadge } from "@/features/places/components/place-event-badge";
 import { ReportActivityIcon } from "@/features/places/components/report-activity-icon";
 import type { Place } from "@/features/places/types";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +74,7 @@ export function PlaceList({
         const selected = place.id === selectedPlaceId;
         const favorited = isFavorite(place.id);
         const live = getPlaceLiveSummary(place);
+        const activeEvent = getActivePlaceEvent(place);
         const amenityLabels = [
           live.amenities.hasScreen ? "대형스크린" : null,
           live.amenities.hasSound ? "경기음향" : null,
@@ -119,6 +122,9 @@ export function PlaceList({
                     >
                       <Flame className="size-3.5 fill-current" aria-hidden />
                     </span>
+                  ) : null}
+                  {activeEvent ? (
+                    <PlaceEventBadge event={activeEvent} />
                   ) : null}
                 </div>
 

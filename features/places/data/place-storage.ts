@@ -147,9 +147,20 @@ export function writePlacesToStorage(places: Place[]) {
   }
 }
 
+function mergeMockPlaceEvents(places: Place[]): Place[] {
+  const mockById = new Map(mockPlaces.map((place) => [place.id, place]));
+  return places.map((place) => {
+    const mock = mockById.get(place.id);
+    if (!mock) return place;
+    return { ...place, events: mock.events };
+  });
+}
+
 export function seedPlacesIfEmpty(): Place[] {
   const existing = readPlacesFromStorage();
-  if (existing) return existing;
+  if (existing) {
+    return mergeMockPlaceEvents(existing);
+  }
   const seeded = mockPlaces.map(normalizePlace);
   writePlacesToStorage(seeded);
   return seeded;

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Star } from "lucide-react";
+import { Star, Ticket } from "lucide-react";
 import { sports } from "@/features/catalog/constants";
 import { sportAccentColor } from "@/features/catalog/sport-colors";
 import { SportIcon } from "@/features/catalog/sport-icons";
@@ -35,13 +35,18 @@ export function PlaceFilters({
     onChange({ ...filters, favoritesOnly: !filters.favoritesOnly });
   }
 
+  function toggleEventsOnly() {
+    onChange({ ...filters, eventsOnly: !filters.eventsOnly });
+  }
+
   const chips = (
     <>
       <FilterChip
         pressed={
           filters.sportId === null &&
           !filters.favoritesOnly &&
-          !filters.recentReportOnly
+          !filters.recentReportOnly &&
+          !filters.eventsOnly
         }
         onClick={() =>
           onChange({
@@ -49,18 +54,19 @@ export function PlaceFilters({
             sportId: null,
             favoritesOnly: false,
             recentReportOnly: false,
+            eventsOnly: false,
           })
         }
       >
         전체
       </FilterChip>
       <FilterChip
-        pressed={filters.favoritesOnly}
-        onClick={toggleFavoritesOnly}
-        tone="live"
+        pressed={filters.eventsOnly}
+        onClick={toggleEventsOnly}
+        tone="event"
       >
-        <Star className="size-3" aria-hidden />
-        즐겨찾기
+        <Ticket className="size-3" aria-hidden />
+        이벤트
       </FilterChip>
       {sports.map((sport) => {
         const pressed = filters.sportId === sport.id;
@@ -89,6 +95,14 @@ export function PlaceFilters({
       >
         <ReportActivityIcon variant="recent" appearance="bare" />
         최근 방문
+      </FilterChip>
+      <FilterChip
+        pressed={filters.favoritesOnly}
+        onClick={toggleFavoritesOnly}
+        tone="live"
+      >
+        <Star className="size-3" aria-hidden />
+        즐겨찾기
       </FilterChip>
     </>
   );
@@ -122,13 +136,13 @@ function FilterChip({
   onClick: () => void;
   children: ReactNode;
   accent?: string;
-  tone?: "live";
+  tone?: "live" | "event";
 }) {
   return (
     <Button
       type="button"
       size="sm"
-      variant={pressed && !accent && tone !== "live" ? "default" : "outline"}
+      variant={pressed && !accent && !tone ? "default" : "outline"}
       aria-pressed={pressed}
       onClick={onClick}
       className={cn(
@@ -136,6 +150,9 @@ function FilterChip({
         pressed &&
           tone === "live" &&
           "border-transparent bg-report text-report-foreground hover:bg-report/90",
+        pressed &&
+          tone === "event" &&
+          "bg-primary text-primary-foreground hover:bg-primary/90 border-transparent",
         pressed && accent && "border-transparent text-white hover:opacity-90",
       )}
       style={

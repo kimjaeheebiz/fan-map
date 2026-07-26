@@ -22,6 +22,15 @@ export const mockPlaces: Place[] = [
     categoryName: "술집",
     coverImageUrl: placeholderImage("잠실 포차", "#1d4ed8"),
     createdAt: "2026-03-01T10:00:00.000Z",
+    events: [
+      {
+        id: "event-j01-beer",
+        title: "생맥주 1잔 무료",
+        badgeLabel: "이벤트",
+        startsAt: "2026-07-01",
+        endsAt: "2026-12-31",
+      },
+    ],
     reports: [
       {
         id: "report-j01-1",
@@ -63,6 +72,15 @@ export const mockPlaces: Place[] = [
     lng: 127.0788,
     categoryName: "음식점",
     createdAt: "2026-03-02T10:00:00.000Z",
+    events: [
+      {
+        id: "event-j02-expired",
+        title: "치킨 세트 할인 (종료)",
+        badgeLabel: "이벤트",
+        startsAt: "2026-05-01",
+        endsAt: "2026-06-30",
+      },
+    ],
     reports: [
       {
         id: "report-j02-1",
@@ -90,6 +108,15 @@ export const mockPlaces: Place[] = [
     categoryName: "술집",
     coverImageUrl: placeholderImage("스포츠바", "#0f766e"),
     createdAt: "2026-03-03T10:00:00.000Z",
+    events: [
+      {
+        id: "event-j03-snack",
+        title: "안주 1메뉴 반값",
+        badgeLabel: "이벤트",
+        startsAt: "2026-07-15",
+        endsAt: "2026-08-31",
+      },
+    ],
     reports: [
       {
         id: "report-j03-1",

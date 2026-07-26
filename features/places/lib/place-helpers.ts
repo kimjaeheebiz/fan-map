@@ -1,6 +1,11 @@
 import { sports, teams } from "@/features/catalog/constants";
 import type { SportId } from "@/features/catalog/types";
-import type { Place, SportTeamSet, ViewingReport } from "@/features/places/types";
+import type {
+  Place,
+  PlaceEvent,
+  SportTeamSet,
+  ViewingReport,
+} from "@/features/places/types";
 import { formatDate } from "@/lib/format-date";
 
 const sportCatalogOrder = new Map(sports.map((sport) => [sport.id, sport.order]));
@@ -205,4 +210,27 @@ export function getPlaceLiveSummary(place: Place) {
     amenities,
     isHot: todayCount > 0 || recentCount >= 2,
   };
+}
+
+/** 오늘 기준 진행 중 이벤트 1건 (종료일이 가장 가까운 것) */
+export function getActivePlaceEvent(place: Place): PlaceEvent | null {
+  const events = place.events;
+  if (!events?.length) return null;
+
+  const today = formatDate(new Date());
+  const active = events.filter((event) => {
+    const start = formatDate(event.startsAt);
+    const end = formatDate(event.endsAt);
+    return start <= today && today <= end;
+  });
+  if (active.length === 0) return null;
+
+  active.sort((a, b) =>
+    formatDate(a.endsAt).localeCompare(formatDate(b.endsAt)),
+  );
+  return active[0] ?? null;
+}
+
+export function hasActivePlaceEvent(place: Place) {
+  return getActivePlaceEvent(place) != null;
 }

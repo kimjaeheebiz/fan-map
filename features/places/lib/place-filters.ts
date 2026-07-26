@@ -5,6 +5,7 @@ import {
   getLatestReport,
   getPlaceSportIds,
   getReportTeamIds,
+  hasActivePlaceEvent,
 } from "@/features/places/lib/place-helpers";
 
 /** 최근 관람 제보 기준일 수 (PoC) */
@@ -14,12 +15,14 @@ export type PlaceFilterState = {
   sportId: SportId | null;
   recentReportOnly: boolean;
   favoritesOnly: boolean;
+  eventsOnly: boolean;
 };
 
 export const defaultPlaceFilters: PlaceFilterState = {
   sportId: null,
   recentReportOnly: false,
   favoritesOnly: false,
+  eventsOnly: false,
 };
 
 export function hasRecentReport(
@@ -87,6 +90,7 @@ export function filterPlaces(
     }
     if (filters.recentReportOnly && !hasRecentReport(place)) return false;
     if (filters.favoritesOnly && !favoriteSet.has(place.id)) return false;
+    if (filters.eventsOnly && !hasActivePlaceEvent(place)) return false;
     return true;
   });
 }
@@ -99,6 +103,7 @@ export function hasActivePlaceFilters(
     searchQuery.trim().length > 0 ||
     filters.sportId !== null ||
     filters.recentReportOnly ||
-    filters.favoritesOnly
+    filters.favoritesOnly ||
+    filters.eventsOnly
   );
 }

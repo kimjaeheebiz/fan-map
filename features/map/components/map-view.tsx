@@ -63,6 +63,10 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
     const markersRef = useRef<Map<string, NaverMarker>>(new Map());
     const onSelectRef = useRef(onSelectPlace);
     const onMapReadyRef = useRef(onMapReady);
+    const placesRef = useRef(places);
+    const selectedPlaceIdRef = useRef(selectedPlaceId);
+    const favoritePlaceIdsRef = useRef(favoritePlaceIds);
+    const filterSportIdRef = useRef(filterSportId);
     const viewStateRef = useRef<{ lat: number; lng: number; zoom: number }>({
       lat: DEFAULT_MAP_CENTER.lat,
       lng: DEFAULT_MAP_CENTER.lng,
@@ -73,6 +77,8 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
     const [status, setStatus] = useState<"loading" | "ready" | "error">(
       "loading",
     );
+    /** 지도 인스턴스가 바뀔 때마다 증가 — 테마 전환 후 마커 재동기화용 */
+    const [mapEpoch, setMapEpoch] = useState(0);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const mapScheme =
@@ -90,6 +96,22 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
       onMapReadyRef.current = onMapReady;
     }, [onMapReady]);
 
+    useEffect(() => {
+      placesRef.current = places;
+    }, [places]);
+
+    useEffect(() => {
+      selectedPlaceIdRef.current = selectedPlaceId;
+    }, [selectedPlaceId]);
+
+    useEffect(() => {
+      favoritePlaceIdsRef.current = favoritePlaceIds;
+    }, [favoritePlaceIds]);
+
+    useEffect(() => {
+      filterSportIdRef.current = filterSportId;
+    }, [filterSportId]);
+
     function rememberViewState(map: NaverMap) {
       const center = map.getCenter();
       viewStateRef.current = {
@@ -97,6 +119,63 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
         lng: center.lng(),
         zoom: map.getZoom(),
       };
+    }
+
+    function syncMarkersToMap() {
+      if (!mapRef.current || !window.naver?.maps || !containerRef.current) {
+        return;
+      }
+
+      const { maps } = window.naver;
+      const map = mapRef.current;
+      const nextPlaces = placesRef.current;
+      const nextSelectedId = selectedPlaceIdRef.current;
+      const nextFavoriteIds = favoritePlaceIdsRef.current;
+      const nextFilterSportId = filterSportIdRef.current;
+      const nextIds = new Set(nextPlaces.map((p) => p.id));
+      const favoriteSet = new Set(nextFavoriteIds);
+
+      markersRef.current.forEach((marker, id) => {
+        if (!nextIds.has(id)) {
+          marker.setMap(null);
+          markersRef.current.delete(id);
+        }
+      });
+
+      for (const place of nextPlaces) {
+        const position = new maps.LatLng(place.lat, place.lng);
+        const selected = place.id === nextSelectedId;
+        const favorite = favoriteSet.has(place.id);
+        const icon = createPlaceMarkerIcon(maps, place.id, {
+          favorite,
+          sportId: getDisplaySportId(place, nextFilterSportId),
+          reportCount: getReportCount(place),
+          multiSport: getPlaceSportsRanked(place).length > 1,
+        });
+        let marker = markersRef.current.get(place.id);
+
+        if (!marker) {
+          marker = new maps.Marker({
+            map,
+            position,
+            title: place.name,
+            icon,
+            zIndex: selected ? 10 : favorite ? 5 : 1,
+          });
+          maps.Event.addListener(marker, "click", () => {
+            onSelectRef.current(place.id, "map");
+          });
+          markersRef.current.set(place.id, marker);
+        } else {
+          marker.setPosition(position);
+          marker.setMap(map);
+          marker.setIcon(icon);
+          marker.setZIndex(selected ? 10 : favorite ? 5 : 1);
+        }
+      }
+
+      syncMarkerSelection(containerRef.current, nextSelectedId);
+      syncMarkerFavorites(containerRef.current, nextFavoriteIds);
     }
 
     useImperativeHandle(ref, () => ({
@@ -127,6 +206,7 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
       if (!themeReady) return;
 
       let cancelled = false;
+      let idleListener: unknown = null;
 
       async function init() {
         try {
@@ -149,12 +229,41 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
               ? { customStyleId: NAVER_MAP_DARK_STYLE_ID }
               : {}),
           });
+
+          if (cancelled) {
+            map.destroy?.();
+            return;
+          }
+
           mapRef.current = map;
-          maps.Event.addListener(map, "idle", () => {
+
+          let becameReady = false;
+          const markReady = () => {
+            if (cancelled || becameReady || mapRef.current !== map) return;
+            becameReady = true;
+            setStatus("ready");
+            setMapEpoch((epoch) => epoch + 1);
+            // idle/timeout 직후 동기화 — effect 타이밍과 무관하게 마커 부착
+            syncMarkersToMap();
+            onMapReadyRef.current?.();
+          };
+
+          idleListener = maps.Event.addListener(map, "idle", () => {
             if (mapRef.current) rememberViewState(mapRef.current);
+            markReady();
           });
-          setStatus("ready");
-          onMapReadyRef.current?.();
+
+          if (cancelled) {
+            if (idleListener) {
+              maps.Event.removeListener(idleListener);
+            }
+            map.destroy?.();
+            mapRef.current = null;
+            return;
+          }
+
+          // idle이 늦거나 안 오는 환경 대비
+          window.setTimeout(markReady, 0);
         } catch (error) {
           if (cancelled) return;
           setStatus("error");
@@ -166,12 +275,15 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
         }
       }
 
-      setStatus((current) => (current === "ready" ? current : "loading"));
+      setStatus("loading");
       void init();
 
       return () => {
         cancelled = true;
         if (mapRef.current) rememberViewState(mapRef.current);
+        if (idleListener && window.naver?.maps) {
+          window.naver.maps.Event.removeListener(idleListener);
+        }
         markersRef.current.forEach((marker) => marker.setMap(null));
         markersRef.current.clear();
         mapRef.current?.destroy?.();
@@ -180,55 +292,16 @@ export const MapView = forwardRef<MapViewHandle, MapViewProps>(
     }, [mapScheme, themeReady]);
 
     useEffect(() => {
-      if (status !== "ready" || !mapRef.current || !window.naver?.maps) return;
-
-      const { maps } = window.naver;
-      const map = mapRef.current;
-      const nextIds = new Set(places.map((p) => p.id));
-      const favoriteSet = new Set(favoritePlaceIds);
-
-      markersRef.current.forEach((marker, id) => {
-        if (!nextIds.has(id)) {
-          marker.setMap(null);
-          markersRef.current.delete(id);
-        }
-      });
-
-      for (const place of places) {
-        const position = new maps.LatLng(place.lat, place.lng);
-        const selected = place.id === selectedPlaceId;
-        const favorite = favoriteSet.has(place.id);
-        const icon = createPlaceMarkerIcon(maps, place.id, {
-          favorite,
-          sportId: getDisplaySportId(place, filterSportId),
-          reportCount: getReportCount(place),
-          multiSport: getPlaceSportsRanked(place).length > 1,
-        });
-        let marker = markersRef.current.get(place.id);
-
-        if (!marker) {
-          marker = new maps.Marker({
-            map,
-            position,
-            title: place.name,
-            icon,
-            zIndex: selected ? 10 : favorite ? 5 : 1,
-          });
-          maps.Event.addListener(marker, "click", () => {
-            onSelectRef.current(place.id, "map");
-          });
-          markersRef.current.set(place.id, marker);
-        } else {
-          marker.setPosition(position);
-          marker.setMap(map);
-          marker.setIcon(icon);
-          marker.setZIndex(selected ? 10 : favorite ? 5 : 1);
-        }
-      }
-
-      syncMarkerSelection(containerRef.current, selectedPlaceId);
-      syncMarkerFavorites(containerRef.current, favoritePlaceIds);
-    }, [places, selectedPlaceId, favoritePlaceIds, filterSportId, status]);
+      if (status !== "ready" || mapEpoch === 0) return;
+      syncMarkersToMap();
+    }, [
+      places,
+      selectedPlaceId,
+      favoritePlaceIds,
+      filterSportId,
+      status,
+      mapEpoch,
+    ]);
 
     return (
       <div className={cn("relative h-full w-full", className)}>

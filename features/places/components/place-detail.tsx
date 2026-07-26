@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import {
   getLatestReport,
+  getActivePlaceEvent,
   getPlaceAmenityFlags,
   getPlaceGalleryImages,
   getPlaceLiveSummary,
@@ -10,6 +11,7 @@ import {
   getReportCount,
   getTopTeamShortNames,
 } from "@/features/places/lib/place-helpers";
+import { PlaceEventBanner } from "@/features/places/components/place-event-banner";
 import { PlaceImageGallery } from "@/features/places/components/place-image-gallery";
 import { PlaceReportItem } from "@/features/places/components/place-report-card";
 import { getSportName, getTagLabel } from "@/features/catalog/constants";
@@ -71,6 +73,7 @@ export function PlaceDetail({
   const latest = getLatestReport(place);
   const sports = getPlaceSportIds(place);
   const live = getPlaceLiveSummary(place);
+  const activeEvent = getActivePlaceEvent(place);
   const amenities = getPlaceAmenityFlags(place);
   const teamNames = getTopTeamShortNames(place, 4);
   const { isFavorite, toggleFavorite } = useFavoritePlaceIds();
@@ -233,6 +236,8 @@ export function PlaceDetail({
               </p>
             </div>
           )}
+
+          {activeEvent ? <PlaceEventBanner event={activeEvent} /> : null}
 
           <PlaceImageGallery images={galleryImages} />
 

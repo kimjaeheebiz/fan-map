@@ -24,9 +24,9 @@ export const primaryColorTokens: Record<
     },
     dark: {
       primary: "#3B82F6",
-      primaryForeground: "#0a0a0a",
+      primaryForeground: "#ffffff",
       sidebarPrimary: "#3B82F6",
-      sidebarPrimaryForeground: "#0a0a0a",
+      sidebarPrimaryForeground: "#ffffff",
     },
   },
   green: {
@@ -38,9 +38,9 @@ export const primaryColorTokens: Record<
     },
     dark: {
       primary: "#5ea500",
-      primaryForeground: "#0f1c0f",
+      primaryForeground: "#ffffff",
       sidebarPrimary: "#5ea500",
-      sidebarPrimaryForeground: "#0f1c0f",
+      sidebarPrimaryForeground: "#ffffff",
     },
   },
   orange: {
@@ -52,9 +52,9 @@ export const primaryColorTokens: Record<
     },
     dark: {
       primary: "#ff8904",
-      primaryForeground: "#441b06",
+      primaryForeground: "#ffffff",
       sidebarPrimary: "#ff8904",
-      sidebarPrimaryForeground: "#441b06",
+      sidebarPrimaryForeground: "#ffffff",
     },
   },
   red: {
@@ -66,9 +66,9 @@ export const primaryColorTokens: Record<
     },
     dark: {
       primary: "#fb2c36",
-      primaryForeground: "#fef2f2",
+      primaryForeground: "#ffffff",
       sidebarPrimary: "#fb2c36",
-      sidebarPrimaryForeground: "#fef2f2",
+      sidebarPrimaryForeground: "#ffffff",
     },
   },
   violet: {
@@ -80,9 +80,9 @@ export const primaryColorTokens: Record<
     },
     dark: {
       primary: "#a684ff",
-      primaryForeground: "#231b3b",
+      primaryForeground: "#ffffff",
       sidebarPrimary: "#a684ff",
-      sidebarPrimaryForeground: "#231b3b",
+      sidebarPrimaryForeground: "#ffffff",
     },
   },
   rose: {
@@ -96,7 +96,7 @@ export const primaryColorTokens: Record<
       primary: "#FF2D55",
       primaryForeground: "#ffffff",
       sidebarPrimary: "#FF4D78",
-      sidebarPrimaryForeground: "#2c0610",
+      sidebarPrimaryForeground: "#ffffff",
     },
   },
   zinc: {

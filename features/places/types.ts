@@ -22,6 +22,15 @@ export type ViewingReport = {
   createdAt: string;
 };
 
+/** 장소 프로모·이벤트 (운영 큐레이션) */
+export type PlaceEvent = {
+  id: string;
+  title: string;
+  badgeLabel?: string;
+  startsAt: string;
+  endsAt: string;
+};
+
 export type Place = {
   id: string;
   naverPlaceId?: string;
@@ -33,6 +42,7 @@ export type Place = {
   categoryName?: string;
   naverMapUrl?: string;
   coverImageUrl?: string; // 대표 이미지. 비어 있으면 첫 제보 images[0] 사용
+  events?: PlaceEvent[];
   reports: ViewingReport[];
   createdAt: string;
 };
