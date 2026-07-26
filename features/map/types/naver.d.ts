@@ -66,7 +66,8 @@ export type NaverMapsNamespace = {
       target: object,
       eventName: string,
       listener: (...args: unknown[]) => void,
-    ) => void;
+    ) => unknown;
+    removeListener: (listener: unknown) => void;
   };
 };
 
