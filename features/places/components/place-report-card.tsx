@@ -69,15 +69,6 @@ export function PlaceReportItem({
   }
 
   function handleEdit() {
-    if (!isReady) return;
-    if (!isAuthenticated) {
-      requireLogin();
-      return;
-    }
-    if (!isOwner) {
-      toast.error("본인이 남긴 기록만 수정할 수 있습니다.");
-      return;
-    }
     onEdit(report);
   }
 
@@ -119,7 +110,6 @@ export function PlaceReportItem({
         reportId: report.id,
         editorId: user.id,
       });
-      toast.success("방문 경험을 삭제했습니다.");
       setDeleteOpen(false);
     } catch (error) {
       if (error instanceof PlacesStorageError) {

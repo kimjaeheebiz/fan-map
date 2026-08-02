@@ -125,10 +125,6 @@ export function ReportDialog({
           toast.message("수정은 로그인 후 이용할 수 있습니다.");
           return;
         }
-        if (editReport.authorId !== user.id) {
-          toast.error("본인이 남긴 기록만 수정할 수 있습니다.");
-          return;
-        }
 
         const place = await updateReportMutation.mutateAsync({
           placeId: editReport.placeId,
@@ -142,7 +138,6 @@ export function ReportDialog({
             images: values.images,
           },
         });
-        toast.success("방문 경험을 수정했습니다.");
         onSubmitted?.(place);
         handleClose(false);
         return;
@@ -166,7 +161,6 @@ export function ReportDialog({
         },
       });
 
-      toast.success("방문 경험을 남겼습니다.");
       onSubmitted?.(place);
       handleClose(false);
     } catch (error) {

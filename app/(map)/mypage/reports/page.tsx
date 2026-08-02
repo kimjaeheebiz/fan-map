@@ -56,7 +56,6 @@ export default function MyReportsPage() {
         reportId: pendingDelete.report.id,
         editorId: user.id,
       });
-      toast.success("방문 경험을 삭제했습니다.");
       setPendingDelete(null);
     } catch (error) {
       if (error instanceof PlacesStorageError) {
