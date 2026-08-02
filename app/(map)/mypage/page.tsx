@@ -25,10 +25,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/format-date";
-
-function nicknameInitial(nickname: string) {
-  return nickname.trim().slice(0, 1) || "?";
-}
+import { nicknameInitial } from "@/lib/nickname";
 
 const activityItems: AccountMenuItem[] = [
   {

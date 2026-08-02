@@ -17,7 +17,7 @@ type PlaceRankingPanelProps = {
   selectedPlaceId?: string | null;
   onSelectPlace: (placeId: string) => void;
   className?: string;
-  /** 탭 목록 compact (모바일 시트) */
+  /** 탭 목록 compact (다이얼로그) */
   compact?: boolean;
 };
 
@@ -33,7 +33,7 @@ const rankingTabs: {
 /** 헤더 + 7행 기준 고정 높이 (이름만 표시) */
 export const PLACE_RANKING_PANEL_HEIGHT_CLASS = "h-[22rem]";
 
-/** 랭킹 탭 + Top 목록 (PC 패널·모바일 시트 공용) */
+/** 랭킹 탭 + Top 목록 (패널·다이얼로그 공용) */
 export function PlaceRankingPanel({
   places,
   selectedPlaceId = null,

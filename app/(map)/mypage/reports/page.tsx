@@ -12,6 +12,7 @@ import {
 } from "@/features/places/hooks/use-report-mutations";
 import { usePlaces } from "@/features/places/hooks/use-places";
 import { RelativeTime } from "@/features/places/components/relative-time";
+import { getReportTimeMs } from "@/features/places/lib/place-helpers";
 import { getSportName } from "@/features/catalog/constants";
 import type { Place, ViewingReport } from "@/features/places/types";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
@@ -43,9 +44,7 @@ export default function MyReportsPage() {
           .map((report) => ({ place, report })),
       )
       .sort(
-        (a, b) =>
-          new Date(b.report.createdAt).getTime() -
-          new Date(a.report.createdAt).getTime(),
+        (a, b) => getReportTimeMs(b.report) - getReportTimeMs(a.report),
       );
   }, [places, user]);
 

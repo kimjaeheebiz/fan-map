@@ -8,7 +8,7 @@
 |----|-----|------|
 | `theme` | `light` \| `dark` | next-themes (`app.ts` 기본값 우선, system 미사용) |
 | `primaryColor` | `blue` \| `green` \| … | `--primary` 계열 |
-| `radius` | `none` \| `sm` \| `md` \| `lg` \| `xl` | `--radius` (shadcn). 화면에서 `rounded-*` 하드코딩 금지 → [CODING_CONVENTION §3](./CODING_CONVENTION.md) |
+| `radius` | `none` \| `sm` \| `md` \| `lg` \| `xl` | `--radius` (shadcn). 화면에서 `rounded-*` 하드코딩 금지 → [coding §3](../conventions/coding.md) |
 | `layout` | `vertical` \| `horizontal` | Sidebar / 상단 네비 |
 | `sidebar` | `expanded` \| `collapsed` | 사이드바 너비 |
 | `header` | `fixed` \| `static` | sticky 여부 |

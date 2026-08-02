@@ -6,17 +6,31 @@ import type {
   SportTeamSet,
   ViewingReport,
 } from "@/features/places/types";
-import { formatDate } from "@/lib/format-date";
+import { formatDate, formatDateTimeMinute } from "@/lib/format-date";
 
 const sportCatalogOrder = new Map(sports.map((sport) => [sport.id, sport.order]));
 
-/** reports는 최신순(앞이 최신)으로 유지한다. */
 export function getReportCount(place: Place) {
   return place.reports.length;
 }
 
-export function getLatestReport(place: Place): ViewingReport | undefined {
-  return place.reports[0];
+/** 방문 일시 우선, 없으면 작성 시각 */
+export function getReportTimeMs(report: ViewingReport) {
+  const watched = new Date(report.watchedAt).getTime();
+  if (Number.isFinite(watched)) return watched;
+  const created = new Date(report.createdAt).getTime();
+  return Number.isFinite(created) ? created : 0;
+}
+
+/** 방문 일시 최신순 — 동률이면 작성 시각 */
+export function sortReportsNewestFirst(reports: ViewingReport[]) {
+  return [...reports].sort((a, b) => {
+    const byWatched = getReportTimeMs(b) - getReportTimeMs(a);
+    if (byWatched !== 0) return byWatched;
+    return (
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  });
 }
 
 export function getCoverImageUrl(place: Place): string | undefined {
@@ -134,7 +148,7 @@ export function sportTeamsFromFlat(
   }));
 }
 
-/** 오늘 0시 이후 생성된 제보 수 */
+/** 오늘 0시 이후 작성된 제보 수 (createdAt) */
 export function getTodayReportCount(place: Place) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
@@ -143,7 +157,7 @@ export function getTodayReportCount(place: Place) {
   ).length;
 }
 
-/** 최근 N일 제보 수 */
+/** 최근 N일 작성 제보 수 (createdAt) */
 export function getRecentReportCount(place: Place, days = 14) {
   const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
   return place.reports.filter(
@@ -153,15 +167,15 @@ export function getRecentReportCount(place: Place, days = 14) {
 
 export function formatRelativeTime(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
-  if (!Number.isFinite(diffMs) || diffMs < 0) return iso;
+  if (!Number.isFinite(diffMs) || diffMs < 0) return formatDateTimeMinute(iso);
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 1) return "방금";
   if (mins < 60) return `${mins}분 전`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours}시간 전`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}일 전`;
-  return formatDate(iso);
+  if (days < 10) return `${days}일 전`;
+  return formatDateTimeMinute(iso);
 }
 
 /** 장소 제보 tagIds 합집합 — 카테고리 우선순 정렬 */

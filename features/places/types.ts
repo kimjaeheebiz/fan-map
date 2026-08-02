@@ -16,7 +16,7 @@ export type ViewingReport = {
   review: string;
   tagIds?: string[];
   images: string[]; // Base64 data URL only (max 5)
-  likedByIds?: string[]; // 좋아요한 사용자 id
+  likedByIds?: string[]; // 좋아요한 사용자·게스트 id
   createdAt: string;
 };
 

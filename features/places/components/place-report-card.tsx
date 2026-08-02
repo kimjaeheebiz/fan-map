@@ -30,7 +30,9 @@ import {
   useToggleReportLike,
 } from "@/features/places/hooks/use-report-mutations";
 import { RelativeTime } from "@/features/places/components/relative-time";
+import { resolveLikerId, useLikerId } from "@/features/places/lib/liker-id";
 import type { ViewingReport } from "@/features/places/types";
+import { nicknameInitial } from "@/lib/nickname";
 import { cn } from "@/lib/utils";
 
 type PlaceReportItemProps = {
@@ -38,11 +40,6 @@ type PlaceReportItemProps = {
   onEdit: (report: ViewingReport) => void;
   className?: string;
 };
-
-function nicknameInitial(nickname: string) {
-  const trimmed = nickname.trim();
-  return trimmed ? trimmed.slice(0, 1) : "?";
-}
 
 /** 제보 리스트 행 — 카드가 아닌 라인 아이템 */
 export function PlaceReportItem({
@@ -60,7 +57,8 @@ export function PlaceReportItem({
   const isOwner = Boolean(user && report.authorId === user.id);
   const likedByIds = report.likedByIds ?? [];
   const likeCount = likedByIds.length;
-  const liked = Boolean(user && likedByIds.includes(user.id));
+  const likerId = useLikerId(user?.id);
+  const liked = Boolean(likerId && likedByIds.includes(likerId));
 
   function requireLogin() {
     toast.message("로그인 후 이용할 수 있습니다.");
@@ -93,16 +91,13 @@ export function PlaceReportItem({
   }
 
   async function handleToggleLike() {
-    if (!isReady) return;
-    if (!user) {
-      requireLogin();
-      return;
-    }
+    const id = resolveLikerId(user?.id);
+    if (!id) return;
     try {
       await likeMutation.mutateAsync({
         placeId: report.placeId,
         reportId: report.id,
-        userId: user.id,
+        userId: id,
       });
     } catch (error) {
       if (error instanceof PlacesStorageError) {
@@ -139,18 +134,18 @@ export function PlaceReportItem({
     <>
       <article
         className={cn(
-          "relative min-w-0 space-y-2 py-3 pr-11 pl-4",
+          "relative min-w-0 space-y-2 px-4 py-3",
           className,
         )}
       >
-        <div className="absolute top-2.5 right-2 z-10">
+        <div className="absolute top-1.5 right-2 z-10">
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon-xs"
                   className="shrink-0"
                   aria-label="방문 기록 메뉴"
                   onPointerDown={(event) => event.stopPropagation()}
@@ -184,7 +179,7 @@ export function PlaceReportItem({
           </DropdownMenu>
         </div>
 
-        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 pr-9">
           {(report.sportTeams ?? []).map((set) => {
             const teamNames = (set.teamIds ?? [])
               .map((teamId) => getTeamName(teamId))
@@ -208,18 +203,17 @@ export function PlaceReportItem({
         </div>
 
         <div className="flex min-w-0 items-center gap-2">
-          <Avatar size="sm" className="size-6">
+          <Avatar size="sm" className="size-6 shrink-0">
             <AvatarFallback className="text-[10px] font-semibold">
               {nicknameInitial(report.authorNickname)}
             </AvatarFallback>
           </Avatar>
-          <p className="text-muted-foreground min-w-0 truncate text-xs">
+          <p className="text-muted-foreground min-w-0 flex-1 truncate text-xs">
             {report.authorNickname}
-            <span className="text-muted-foreground/70">
-              {" "}
-              · <RelativeTime value={report.watchedAt} />
-            </span>
           </p>
+          <span className="text-muted-foreground/70 shrink-0">
+            <RelativeTime value={report.watchedAt} />
+          </span>
         </div>
 
         <p className="whitespace-pre-wrap break-words text-sm [overflow-wrap:anywhere]">
@@ -286,6 +280,3 @@ export function PlaceReportItem({
     </>
   );
 }
-
-/** @deprecated PlaceReportItem 사용 */
-export const PlaceReportCard = PlaceReportItem;

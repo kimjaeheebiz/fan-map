@@ -1,11 +1,11 @@
 ---
-description: 주석·모듈 분리·radius 코딩 컨벤션 (docs/CODING_CONVENTION.md)
+description: 주석·모듈 분리·radius 코딩 컨벤션 (docs/conventions/coding.md)
 alwaysApply: true
 ---
 
 # 코딩 컨벤션
 
-상세: `docs/CODING_CONVENTION.md`. 코드 작성·수정 시 준수.
+상세: `docs/conventions/coding.md`. 코드 작성·수정 시 준수.
 
 ## 주석
 

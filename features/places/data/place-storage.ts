@@ -1,10 +1,13 @@
 import { mockPlaces } from "@/features/places/data/mock-places";
 import type { SportId } from "@/features/catalog/types";
-import { sportTeamsFromFlat } from "@/features/places/lib/place-helpers";
+import {
+  sortReportsNewestFirst,
+  sportTeamsFromFlat,
+} from "@/features/places/lib/place-helpers";
 import type { Place, ViewingReport } from "@/features/places/types";
 import type { PlaceSearchResult } from "@/features/places/types/naver-local-search";
 
-export const PLACES_STORAGE_KEY = "fan-map:places";
+const PLACES_STORAGE_KEY = "fan-map:places";
 const PLACES_SEED_VERSION_KEY = "fan-map:places-seed-version";
 /** mockPlaces 실존 상호 갱신 시 증가 — 로컬 시드 재동기화 */
 const MOCK_SEED_VERSION = 6;
@@ -97,8 +100,8 @@ function normalizeReport(report: LegacyReport): ViewingReport {
 function normalizePlace(place: Place): Place {
   return {
     ...place,
-    reports: place.reports.map((report) =>
-      normalizeReport(report as LegacyReport),
+    reports: sortReportsNewestFirst(
+      place.reports.map((report) => normalizeReport(report as LegacyReport)),
     ),
   };
 }
@@ -168,14 +171,14 @@ function mergeMockPlaces(places: Place[]): Place[] {
 
   const merged = places.map((place) => {
     const mock = mockById.get(place.id);
-    if (!mock) return place;
+    if (!mock) return normalizePlace(place);
 
     const mockReportIds = new Set(mock.reports.map((report) => report.id));
     const userReports = place.reports.filter(
       (report) => !mockReportIds.has(report.id),
     );
 
-    return {
+    return normalizePlace({
       ...place,
       naverPlaceId: mock.naverPlaceId,
       name: mock.name,
@@ -187,7 +190,7 @@ function mergeMockPlaces(places: Place[]): Place[] {
       coverImageUrl: mock.coverImageUrl,
       events: mock.events,
       reports: [...mock.reports, ...userReports],
-    };
+    });
   });
 
   for (const mock of mockPlaces) {
@@ -308,7 +311,7 @@ export function addReport(payload: AddReportPayload): Place {
     createdAt: new Date().toISOString(),
   };
 
-  place.reports = [report, ...place.reports];
+  place.reports = sortReportsNewestFirst([report, ...place.reports]);
 
   if (!place.coverImageUrl && report.images[0]) {
     place.coverImageUrl = report.images[0];
@@ -356,6 +359,7 @@ export function updateReport(payload: UpdateReportPayload): Place {
     tagIds: payload.report.tagIds,
     images: payload.report.images,
   };
+  place.reports = sortReportsNewestFirst(place.reports);
 
   writePlacesToStorage(places);
   return place;
@@ -437,13 +441,4 @@ export function toggleReportLike(
   place.reports[index] = { ...current, likedByIds };
   writePlacesToStorage(places);
   return { place, liked };
-}
-
-/** 현재 사용자가 작성한 제보 (장소 정보 포함) */
-export function listReportsByAuthor(authorId: string) {
-  return getPlaces().flatMap((place) =>
-    place.reports
-      .filter((report) => report.authorId === authorId)
-      .map((report) => ({ place, report })),
-  );
 }

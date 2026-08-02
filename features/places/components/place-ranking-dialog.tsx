@@ -6,7 +6,10 @@ import {
   DialogScrollLayout,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PlaceRankingPanel } from "@/features/places/components/place-ranking-panel";
+import {
+  PlaceRankingPanel,
+  PLACE_RANKING_PANEL_HEIGHT_CLASS,
+} from "@/features/places/components/place-ranking-panel";
 import type { Place } from "@/features/places/types";
 
 type PlaceRankingDialogProps = {
@@ -17,7 +20,7 @@ type PlaceRankingDialogProps = {
   onSelectPlace: (placeId: string) => void;
 };
 
-/** 모바일 랭킹 시트 */
+/** xl 미만 랭킹 다이얼로그 */
 export function PlaceRankingDialog({
   open,
   onOpenChange,
@@ -38,7 +41,7 @@ export function PlaceRankingDialog({
             places={places}
             selectedPlaceId={selectedPlaceId}
             compact
-            className="h-[22rem]"
+            className={PLACE_RANKING_PANEL_HEIGHT_CLASS}
             onSelectPlace={(placeId) => {
               onSelectPlace(placeId);
               onOpenChange(false);

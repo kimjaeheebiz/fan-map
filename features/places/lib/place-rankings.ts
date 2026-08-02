@@ -8,14 +8,13 @@ export type PlaceRankingKind = "hot" | "rising" | "fans";
 
 export const PLACE_RANKING_LABELS: Record<PlaceRankingKind, string> = {
   hot: "오늘 HOT",
-  rising: "이번 주 급상승",
+  rising: "급상승",
   fans: "팬 추천",
 };
 
 export type RankedPlace = {
   place: Place;
   score: number;
-  meta: string; // 보조 문구
 };
 
 const RANKING_LIMIT = 7;
@@ -38,8 +37,8 @@ function getReportLikeCount(place: Place) {
   );
 }
 
-/** 오늘 방문 수 기준 */
-export function rankPlacesByHot(places: Place[], limit = RANKING_LIMIT) {
+/** 오늘 방문(createdAt) 우선 */
+function rankPlacesByHot(places: Place[], limit: number) {
   return places
     .map((place) => {
       const todayCount = getTodayReportCount(place);
@@ -47,12 +46,6 @@ export function rankPlacesByHot(places: Place[], limit = RANKING_LIMIT) {
       return {
         place,
         score: todayCount * 1000 + recentCount,
-        meta:
-          todayCount > 0
-            ? `오늘 방문 ${todayCount}건`
-            : recentCount > 0
-              ? `최근 방문 ${recentCount}건`
-              : "방문 기록 없음",
       } satisfies RankedPlace;
     })
     .filter((entry) => entry.score > 0)
@@ -60,8 +53,8 @@ export function rankPlacesByHot(places: Place[], limit = RANKING_LIMIT) {
     .slice(0, limit);
 }
 
-/** 최근 7일 vs 직전 7일 증가율 */
-export function rankPlacesByRising(places: Place[], limit = RANKING_LIMIT) {
+/** 최근 7일 vs 직전 7일 (createdAt) */
+function rankPlacesByRising(places: Place[], limit: number) {
   const now = Date.now();
   const weekMs = 7 * 24 * 60 * 60 * 1000;
   const thisWeekStart = now - weekMs;
@@ -76,12 +69,6 @@ export function rankPlacesByRising(places: Place[], limit = RANKING_LIMIT) {
       return {
         place,
         score: growth * 100 + ratio * 10 + thisWeek,
-        meta:
-          prevWeek === 0 && thisWeek > 0
-            ? `이번 주 ${thisWeek}건 (신규)`
-            : growth > 0
-              ? `이번 주 ${thisWeek}건 · +${growth}`
-              : `이번 주 ${thisWeek}건`,
         thisWeek,
         growth,
       };
@@ -89,11 +76,11 @@ export function rankPlacesByRising(places: Place[], limit = RANKING_LIMIT) {
     .filter((entry) => entry.thisWeek > 0 && entry.growth >= 0)
     .sort((a, b) => b.score - a.score || a.place.name.localeCompare(b.place.name))
     .slice(0, limit)
-    .map(({ place, score, meta }) => ({ place, score, meta }));
+    .map(({ place, score }) => ({ place, score }));
 }
 
-/** 좋아요·제보 수 기반 */
-export function rankPlacesByFans(places: Place[], limit = RANKING_LIMIT) {
+/** 좋아요·방문글 수 */
+function rankPlacesByFans(places: Place[], limit: number) {
   return places
     .map((place) => {
       const likes = getReportLikeCount(place);
@@ -101,12 +88,6 @@ export function rankPlacesByFans(places: Place[], limit = RANKING_LIMIT) {
       return {
         place,
         score: likes * 10 + reports,
-        meta:
-          likes > 0
-            ? `좋아요 ${likes} · 방문 글 ${reports}`
-            : reports > 0
-              ? `방문 글 ${reports}`
-              : "추천 데이터 없음",
       } satisfies RankedPlace;
     })
     .filter((entry) => entry.score > 0)

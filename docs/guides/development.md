@@ -1,6 +1,6 @@
 # 개발 가이드
 
-코딩 컨벤션(주석·모듈 분리): [CODING_CONVENTION.md](./CODING_CONVENTION.md)
+코딩 컨벤션(주석·모듈 분리): [coding.md](../conventions/coding.md)
 
 ## 메뉴 노출
 

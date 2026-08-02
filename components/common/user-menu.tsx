@@ -21,10 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-function nicknameInitial(nickname: string) {
-  return nickname.trim().slice(0, 1) || "?";
-}
+import { nicknameInitial } from "@/lib/nickname";
 
 export function UserMenu() {
   const router = useRouter();
