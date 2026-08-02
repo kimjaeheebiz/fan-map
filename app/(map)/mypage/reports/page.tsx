@@ -11,14 +11,14 @@ import {
   useDeleteReport,
 } from "@/features/places/hooks/use-report-mutations";
 import { usePlaces } from "@/features/places/hooks/use-places";
-import { formatRelativeTime } from "@/features/places/lib/place-helpers";
+import { RelativeTime } from "@/features/places/components/relative-time";
 import { getSportName } from "@/features/catalog/constants";
 import type { Place, ViewingReport } from "@/features/places/types";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { Loading } from "@/components/common/loading";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/format-date";
+import { formatDateTimeMinute } from "@/lib/format-date";
 import { Card } from "@/components/ui/card";
 
 type AuthorReportRow = {
@@ -100,10 +100,10 @@ export default function MyReportsPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{place.name}</p>
                   <p className="text-muted-foreground mt-0.5 text-xs">
-                    방문일 {formatDate(report.watchedAt)}
+                    방문 {formatDateTimeMinute(report.watchedAt)}
                     {sportsLabel ? ` · ${sportsLabel}` : ""}
                     {" · "}
-                    {formatRelativeTime(report.createdAt)}
+                    <RelativeTime value={report.createdAt} />
                   </p>
                   <p className="text-muted-foreground mt-1 line-clamp-2 text-xs">
                     {report.review}

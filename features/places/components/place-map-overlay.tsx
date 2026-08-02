@@ -11,7 +11,8 @@ export function PlaceMapOverlay({ children, className }: PlaceMapOverlayProps) {
   return (
     <div
       className={cn(
-        "pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center",
+        // 네이버 지도 로고(z-index:100)보다 위
+        "pointer-events-none absolute inset-x-0 bottom-0 z-[110] flex justify-center",
         className,
       )}
     >

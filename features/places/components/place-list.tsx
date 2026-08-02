@@ -97,8 +97,8 @@ export function PlaceList({
                 : "hover:shadow-md",
             )}
           >
-            <CardHeader className="relative px-3 py-3">
-              <div className="flex items-start gap-3">
+            <CardHeader className="relative min-w-0 px-3 py-3">
+              <div className="flex min-w-0 items-start gap-3">
                 <div className="bg-muted relative size-16 shrink-0 overflow-hidden rounded-md">
                   {cover ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -122,11 +122,17 @@ export function PlaceList({
                   ) : null}
                 </div>
 
-                <div className="min-w-0 flex-1 pr-8">
-                  <CardTitle className="truncate text-sm font-bold">
+                <div className="min-w-0 flex-1 overflow-hidden pr-8">
+                  <CardTitle
+                    className="block truncate text-sm font-bold"
+                    title={place.name}
+                  >
                     {place.name}
                   </CardTitle>
-                  <CardDescription className="mt-0.5 truncate text-xs">
+                  <CardDescription
+                    className="mt-0.5 block truncate text-xs"
+                    title={place.address}
+                  >
                     {place.address}
                   </CardDescription>
 
@@ -140,9 +146,6 @@ export function PlaceList({
                         {live.todayCount > 0
                           ? `오늘 방문 ${live.todayCount}건`
                           : `최근 방문 ${live.recentCount}건`}
-                        {live.latestRelative
-                          ? ` · ${live.latestRelative}`
-                          : ""}
                       </span>
                     </p>
                   )}

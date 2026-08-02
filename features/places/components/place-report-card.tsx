@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Flag, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Flag, Heart, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,8 +27,9 @@ import { PlaceImageGallery } from "@/features/places/components/place-image-gall
 import {
   PlacesStorageError,
   useDeleteReport,
+  useToggleReportLike,
 } from "@/features/places/hooks/use-report-mutations";
-import { formatRelativeTime } from "@/features/places/lib/place-helpers";
+import { RelativeTime } from "@/features/places/components/relative-time";
 import type { ViewingReport } from "@/features/places/types";
 import { cn } from "@/lib/utils";
 
@@ -53,9 +54,13 @@ export function PlaceReportItem({
   const pathname = usePathname();
   const { user, isAuthenticated, isReady } = useAuth();
   const deleteMutation = useDeleteReport();
+  const likeMutation = useToggleReportLike();
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const isOwner = Boolean(user && report.authorId === user.id);
+  const likedByIds = report.likedByIds ?? [];
+  const likeCount = likedByIds.length;
+  const liked = Boolean(user && likedByIds.includes(user.id));
 
   function requireLogin() {
     toast.message("로그인 후 이용할 수 있습니다.");
@@ -85,6 +90,27 @@ export function PlaceReportItem({
       return;
     }
     toast.success("신고가 접수되었습니다. (PoC)");
+  }
+
+  async function handleToggleLike() {
+    if (!isReady) return;
+    if (!user) {
+      requireLogin();
+      return;
+    }
+    try {
+      await likeMutation.mutateAsync({
+        placeId: report.placeId,
+        reportId: report.id,
+        userId: user.id,
+      });
+    } catch (error) {
+      if (error instanceof PlacesStorageError) {
+        toast.error(error.message);
+        return;
+      }
+      toast.error("좋아요 처리에 실패했습니다.");
+    }
   }
 
   async function handleDelete() {
@@ -191,7 +217,7 @@ export function PlaceReportItem({
             {report.authorNickname}
             <span className="text-muted-foreground/70">
               {" "}
-              · {formatRelativeTime(report.createdAt)}
+              · <RelativeTime value={report.watchedAt} />
             </span>
           </p>
         </div>
@@ -220,6 +246,29 @@ export function PlaceReportItem({
             imageClassName="h-20 w-28 rounded-md"
           />
         )}
+
+        <div className="flex items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "text-muted-foreground h-8 gap-1.5 px-2",
+              liked && "text-report hover:text-report",
+            )}
+            aria-label={liked ? "좋아요 취소" : "좋아요"}
+            aria-pressed={liked}
+            disabled={likeMutation.isPending}
+            onClick={() => {
+              void handleToggleLike();
+            }}
+          >
+            <Heart className={cn("size-4", liked && "fill-report")} />
+            {likeCount > 0 ? (
+              <span className="text-xs tabular-nums">{likeCount}</span>
+            ) : null}
+          </Button>
+        </div>
       </article>
 
       <ConfirmDialog

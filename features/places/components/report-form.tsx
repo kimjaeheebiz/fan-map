@@ -197,24 +197,23 @@ export function ReportForm({
           return (
             <div
               key={`${set.sportId}-${index}`}
-              className="space-y-1 rounded-lg border px-4 py-2.5"
+              className="relative space-y-1 rounded-lg border px-4 py-2.5"
             >
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-muted-foreground text-xs font-medium">
-                  종목 {index + 1}
-                </p>
-                {sportTeams.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`${index + 1}번째 종목 삭제`}
-                    onClick={() => removeSet(index)}
-                  >
-                    <Trash2 />
-                  </Button>
-                )}
-              </div>
+              {sportTeams.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`${index + 1}번째 종목 삭제`}
+                  className="absolute top-1.5 right-1.5"
+                  onClick={() => removeSet(index)}
+                >
+                  <Trash2 />
+                </Button>
+              )}
+              <p className="text-muted-foreground text-xs font-medium">
+                종목 {index + 1}
+              </p>
 
               <div className="flex items-start gap-2">
                 <p className="text-muted-foreground mt-1.5 w-9 shrink-0 text-xs font-medium">
@@ -276,11 +275,11 @@ export function ReportForm({
         )}
       </div>
 
-      <FormField control={control} name="watchedAt" label="방문일" required>
+      <FormField control={control} name="watchedAt" label="방문 일시" required>
         {(field) => (
           <Input
             id="watchedAt"
-            type="date"
+            type="datetime-local"
             name={field.name}
             ref={field.ref}
             onBlur={field.onBlur}

@@ -5,9 +5,11 @@ import {
   addReport,
   deleteReport,
   PlacesStorageError,
+  toggleReportLike,
   updateReport,
   type AddReportPayload,
   type DeleteReportPayload,
+  type ToggleReportLikePayload,
   type UpdateReportPayload,
 } from "@/features/places/data/place-storage";
 import { useInvalidatePlaces } from "@/features/places/hooks/use-places";
@@ -40,6 +42,21 @@ export function useDeleteReport() {
 
   return useMutation<Place, Error, DeleteReportPayload>({
     mutationFn: async (payload) => deleteReport(payload),
+    onSuccess: async () => {
+      await invalidatePlaces();
+    },
+  });
+}
+
+export function useToggleReportLike() {
+  const invalidatePlaces = useInvalidatePlaces();
+
+  return useMutation<
+    { place: Place; liked: boolean },
+    Error,
+    ToggleReportLikePayload
+  >({
+    mutationFn: async (payload) => toggleReportLike(payload),
     onSuccess: async () => {
       await invalidatePlaces();
     },

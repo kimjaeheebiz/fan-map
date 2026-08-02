@@ -50,7 +50,7 @@ export function AccountPageShell({
 
   return (
     <div className="bg-canvas flex h-full min-h-0">
-      <aside className="border-border bg-card hidden h-full w-80 shrink-0 flex-col border-r md:flex lg:w-96">
+      <aside className="border-border bg-card hidden h-full w-80 shrink-0 flex-col border-r md:flex lg:w-90">
         <ScrollArea className="min-h-0 flex-1 px-2 py-3">
           <AccountSideNav />
         </ScrollArea>

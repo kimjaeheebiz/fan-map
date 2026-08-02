@@ -24,6 +24,10 @@ import {
 import type { ReportFormValues } from "@/features/places/schema/report-form-schema";
 import type { Place, ViewingReport } from "@/features/places/types";
 import type { PlaceSearchResult } from "@/features/places/types/naver-local-search";
+import {
+  dateTimeLocalToIso,
+  toDateTimeLocalValue,
+} from "@/lib/format-date";
 
 type ReportDialogProps = {
   open: boolean;
@@ -53,7 +57,7 @@ function reportToFormValues(report: ViewingReport): ReportFormValues {
       sportId: set.sportId,
       teamIds: set.teamIds ?? [],
     })),
-    watchedAt: report.watchedAt,
+    watchedAt: toDateTimeLocalValue(report.watchedAt),
     review: report.review,
     tagIds: report.tagIds ?? [],
     images: report.images ?? [],
@@ -132,7 +136,7 @@ export function ReportDialog({
           editorId: user.id,
           report: {
             sportTeams: values.sportTeams,
-            watchedAt: values.watchedAt,
+            watchedAt: dateTimeLocalToIso(values.watchedAt),
             review: values.review,
             tagIds: values.tagIds,
             images: values.images,
@@ -155,7 +159,7 @@ export function ReportDialog({
           authorId: user.id,
           authorNickname: user.nickname,
           sportTeams: values.sportTeams,
-          watchedAt: values.watchedAt,
+          watchedAt: dateTimeLocalToIso(values.watchedAt),
           review: values.review,
           tagIds: values.tagIds,
           images: values.images,

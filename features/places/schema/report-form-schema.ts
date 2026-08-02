@@ -19,7 +19,7 @@ export const reportFormSchema = z.object({
   sportTeams: z
     .array(sportTeamSetSchema)
     .min(1, "종목을 하나 이상 추가해 주세요."),
-  watchedAt: z.string().min(1, "방문일을 선택해 주세요."),
+  watchedAt: z.string().min(1, "방문 일시를 선택해 주세요."),
   review: z
     .string()
     .trim()
@@ -34,14 +34,16 @@ export const reportFormSchema = z.object({
 export type ReportFormValues = z.infer<typeof reportFormSchema>;
 
 export function getDefaultReportFormValues(): ReportFormValues {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const hh = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
 
   return {
     sportTeams: [{ sportId: "baseball", teamIds: [] }],
-    watchedAt: `${yyyy}-${mm}-${dd}`,
+    watchedAt: `${yyyy}-${mm}-${dd}T${hh}:${min}`,
     review: "",
     tagIds: [],
     images: [],

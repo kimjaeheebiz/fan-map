@@ -7,7 +7,7 @@ import type { PlaceSearchResult } from "@/features/places/types/naver-local-sear
 export const PLACES_STORAGE_KEY = "fan-map:places";
 const PLACES_SEED_VERSION_KEY = "fan-map:places-seed-version";
 /** mockPlaces 실존 상호 갱신 시 증가 — 로컬 시드 재동기화 */
-const MOCK_SEED_VERSION = 3;
+const MOCK_SEED_VERSION = 6;
 
 const LEGACY_AUTHORS = [
   { authorId: "mock-user-1", authorNickname: "잠실응원단" },
@@ -304,6 +304,7 @@ export function addReport(payload: AddReportPayload): Place {
     ...payload.report,
     id: createId("report"),
     placeId: place.id,
+    likedByIds: payload.report.likedByIds ?? [],
     createdAt: new Date().toISOString(),
   };
 
@@ -396,6 +397,46 @@ export function deleteReport(payload: DeleteReportPayload): Place {
 
   writePlacesToStorage(places);
   return place;
+}
+
+export type ToggleReportLikePayload = {
+  placeId: string;
+  reportId: string;
+  userId: string;
+};
+
+/** 방문 글 좋아요 토글 — 반환 liked */
+export function toggleReportLike(
+  payload: ToggleReportLikePayload,
+): { place: Place; liked: boolean } {
+  const places = getPlaces();
+  const place = places.find((entry) => entry.id === payload.placeId);
+  if (!place) {
+    throw new PlacesStorageError("장소를 찾을 수 없습니다.", "invalid");
+  }
+
+  const index = place.reports.findIndex(
+    (report) => report.id === payload.reportId,
+  );
+  if (index < 0) {
+    throw new PlacesStorageError("기록을 찾을 수 없습니다.", "invalid");
+  }
+
+  const current = place.reports[index];
+  const likedByIds = [...(current.likedByIds ?? [])];
+  const existing = likedByIds.indexOf(payload.userId);
+  let liked: boolean;
+  if (existing >= 0) {
+    likedByIds.splice(existing, 1);
+    liked = false;
+  } else {
+    likedByIds.push(payload.userId);
+    liked = true;
+  }
+
+  place.reports[index] = { ...current, likedByIds };
+  writePlacesToStorage(places);
+  return { place, liked };
 }
 
 /** 현재 사용자가 작성한 제보 (장소 정보 포함) */

@@ -186,13 +186,11 @@ export function getTopTeamShortNames(place: Place, limit = 3) {
 export function getPlaceLiveSummary(place: Place) {
   const todayCount = getTodayReportCount(place);
   const recentCount = getRecentReportCount(place, 14);
-  const latest = getLatestReport(place);
   const teamsLabel = getTopTeamShortNames(place).join(" · ");
 
   return {
     todayCount,
     recentCount,
-    latestRelative: latest ? formatRelativeTime(latest.createdAt) : null,
     teamsLabel,
     isHot: todayCount > 0 || recentCount >= 2,
   };

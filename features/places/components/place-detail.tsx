@@ -2,7 +2,6 @@
 
 import { useState, type ReactNode } from "react";
 import {
-  getLatestReport,
   getActivePlaceEvent,
   getPlaceGalleryImages,
   getPlaceLiveSummary,
@@ -44,7 +43,6 @@ import {
   Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/format-date";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { authNav } from "@/config/navigation";
 import { useFavoritePlaceIds } from "@/features/places/hooks/use-favorite-place-ids";
@@ -81,7 +79,6 @@ export function PlaceDetail({
   const [refreshing, setRefreshing] = useState(false);
   const { refetch } = usePlaces();
   const galleryImages = getPlaceGalleryImages(place);
-  const latest = getLatestReport(place);
   const sports = getPlaceSportIds(place);
   const live = getPlaceLiveSummary(place);
   const activeEvent = getActivePlaceEvent(place);
@@ -217,23 +214,23 @@ export function PlaceDetail({
         <div className="flex flex-col gap-4 px-4 py-4">
           {(live.todayCount > 0 || live.recentCount > 0 || teamNames.length > 0) && (
             <div className="border-report/20 bg-report/5 space-y-1.5 rounded-lg border px-3 py-2.5">
-              <p className="text-live flex items-center gap-2 text-sm font-bold">
-                <ReportActivityIcon
-                  variant={live.isHot ? "today" : "recent"}
-                />
-                <span>
-                  {live.todayCount > 0
-                    ? `오늘 방문 ${live.todayCount}건`
-                    : `최근 방문 ${live.recentCount}건`}
-                  {live.latestRelative ? ` · ${live.latestRelative}` : ""}
-                </span>
-              </p>
+              {live.todayCount > 0 || live.recentCount > 0 ? (
+                <p className="text-live flex items-center gap-2 text-sm font-bold">
+                  <ReportActivityIcon
+                    variant={live.isHot ? "today" : "recent"}
+                  />
+                  <span>
+                    {live.todayCount > 0
+                      ? `오늘 방문 ${live.todayCount}건`
+                      : `최근 방문 ${live.recentCount}건`}
+                  </span>
+                </p>
+              ) : null}
               {teamNames.length > 0 ? (
                 <p className="text-sm font-medium">{teamNames.join(" · ")}</p>
               ) : null}
               <p className="text-muted-foreground text-xs">
                 방문 경험 {getReportCount(place)}건
-                {latest ? ` · 최근 방문일 ${formatDate(latest.watchedAt)}` : ""}
               </p>
             </div>
           )}

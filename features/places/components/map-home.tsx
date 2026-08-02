@@ -11,6 +11,8 @@ import { PlaceList } from "@/features/places/components/place-list";
 import { PlaceListSheet } from "@/features/places/components/place-list-sheet";
 import { PlacePanel } from "@/features/places/components/place-panel";
 import { PlaceMapOverlay } from "@/features/places/components/place-map-overlay";
+import { PlaceRankingDialog } from "@/features/places/components/place-ranking-dialog";
+import { PlaceRankingPanel } from "@/features/places/components/place-ranking-panel";
 import { ReportDialog } from "@/features/places/components/report-dialog";
 import { MapControls } from "@/features/map/components/map-controls";
 import type { MapViewHandle } from "@/features/map/components/map-view";
@@ -58,6 +60,7 @@ export function MapHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState(defaultPlaceFilters);
   const [reportOpen, setReportOpen] = useState(false);
+  const [rankingOpen, setRankingOpen] = useState(false);
   const [reportPlace, setReportPlace] = useState<Place | null>(null);
   const [editingReport, setEditingReport] = useState<ViewingReport | null>(
     null,
@@ -91,20 +94,11 @@ export function MapHome() {
   const filtersActive = hasActivePlaceFilters(filters, searchQuery);
 
   const selectedPlace =
-    (pendingSelectPlace?.id === selectedPlaceId
-      ? pendingSelectPlace
-      : null) ??
     displayPlaces.find((place) => place.id === selectedPlaceId) ??
     regionPlaces.find((place) => place.id === selectedPlaceId) ??
     allPlaces.find((place) => place.id === selectedPlaceId) ??
+    (pendingSelectPlace?.id === selectedPlaceId ? pendingSelectPlace : null) ??
     null;
-
-  useEffect(() => {
-    if (!pendingSelectPlace) return;
-    if (displayPlaces.some((place) => place.id === pendingSelectPlace.id)) {
-      setPendingSelectPlace(null);
-    }
-  }, [displayPlaces, pendingSelectPlace]);
 
   useEffect(() => {
     if (geoStatus === "denied" || geoStatus === "unavailable") {
@@ -388,7 +382,7 @@ export function MapHome() {
 
   return (
     <div className="flex h-full w-full">
-      <aside className="border-border bg-card hidden w-80 shrink-0 flex-col border-r md:flex lg:w-96">
+      <aside className="border-border bg-card hidden w-80 shrink-0 flex-col border-r md:flex lg:w-90">
         <div className="space-y-3 px-4 py-3">
           <div>
             <p className="text-base font-bold tracking-tight">
@@ -448,13 +442,25 @@ export function MapHome() {
         <MapControls
           onLocate={handleLocate}
           onResearch={handleResearch}
+          onOpenRanking={() => setRankingOpen(true)}
           locateLoading={geoStatus === "loading"}
           researchDisabled={!mapReady}
           sheetBottomOffset={sheetHeight > 0 ? sheetHeight : undefined}
         />
 
+        <div className="pointer-events-none absolute top-3 right-3 z-20 hidden w-76 xl:block">
+          <div className="pointer-events-auto overflow-hidden rounded-lg border shadow-md">
+            <PlaceRankingPanel
+              places={regionPlaces}
+              selectedPlaceId={selectedPlaceId}
+              onSelectPlace={handleSelectPlaceFromList}
+              className="w-full"
+            />
+          </div>
+        </div>
+
         {selectedPlace ? (
-          <div className="pointer-events-none absolute inset-y-3 left-3 z-20 hidden w-[26rem] md:block lg:w-[30rem]">
+          <div className="pointer-events-none absolute inset-y-3 left-3 z-20 hidden w-[26rem] md:block lg:w-[28rem]">
             <div className="pointer-events-auto h-full min-h-0">
               <PlacePanel
                 key={selectedPlace.id}
@@ -497,6 +503,14 @@ export function MapHome() {
             />
           </PlaceMapOverlay>
         )}
+
+        <PlaceRankingDialog
+          open={rankingOpen}
+          onOpenChange={setRankingOpen}
+          places={regionPlaces}
+          selectedPlaceId={selectedPlaceId}
+          onSelectPlace={handleSelectPlaceFromList}
+        />
 
         <ReportDialog
           open={reportOpen}

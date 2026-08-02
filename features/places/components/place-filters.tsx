@@ -7,7 +7,6 @@ import { sportAccentColor } from "@/features/catalog/sport-colors";
 import { SportIcon } from "@/features/catalog/sport-icons";
 import type { SportId } from "@/features/catalog/types";
 import type { PlaceFilterState } from "@/features/places/lib/place-filters";
-import { ReportActivityIcon } from "@/features/places/components/report-activity-icon";
 import { HorizontalScroll } from "@/components/common/horizontal-scroll";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,10 +26,6 @@ export function PlaceFilters({
     onChange({ ...filters, sportId });
   }
 
-  function toggleRecentReportOnly() {
-    onChange({ ...filters, recentReportOnly: !filters.recentReportOnly });
-  }
-
   function toggleFavoritesOnly() {
     onChange({ ...filters, favoritesOnly: !filters.favoritesOnly });
   }
@@ -45,7 +40,6 @@ export function PlaceFilters({
         pressed={
           filters.sportId === null &&
           !filters.favoritesOnly &&
-          !filters.recentReportOnly &&
           !filters.eventsOnly
         }
         onClick={() =>
@@ -53,7 +47,6 @@ export function PlaceFilters({
             ...filters,
             sportId: null,
             favoritesOnly: false,
-            recentReportOnly: false,
             eventsOnly: false,
           })
         }
@@ -88,14 +81,6 @@ export function PlaceFilters({
           </FilterChip>
         );
       })}
-      <FilterChip
-        pressed={filters.recentReportOnly}
-        onClick={toggleRecentReportOnly}
-        tone="live"
-      >
-        <ReportActivityIcon variant="recent" appearance="bare" />
-        최근 방문
-      </FilterChip>
       <FilterChip
         pressed={filters.favoritesOnly}
         onClick={toggleFavoritesOnly}

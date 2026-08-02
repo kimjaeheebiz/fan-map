@@ -12,10 +12,11 @@ export type ViewingReport = {
   authorId: string;
   authorNickname: string;
   sportTeams: SportTeamSet[]; // 종목·팀 세트 (1개 이상). 종목별로 팀을 묶음
-  watchedAt: string;
+  watchedAt: string; // ISO 또는 yyyy-mm-dd(구데이터) — 방문 일시
   review: string;
   tagIds?: string[];
   images: string[]; // Base64 data URL only (max 5)
+  likedByIds?: string[]; // 좋아요한 사용자 id
   createdAt: string;
 };
 
