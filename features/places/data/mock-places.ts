@@ -18,6 +18,13 @@ function placeMeta(
   };
 }
 
+/** 야구는 핑계고 시연용 방문 사진 (`public/places/yaguneun-pinggyego`) */
+const pinggyegoPhoto = (file: string) =>
+  `/places/yaguneun-pinggyego/${file}`;
+
+/** 펍마이마이 시연용 방문 사진 (`public/places/pub-mymy`) */
+const mymyPhoto = (file: string) => `/places/pub-mymy/${file}`;
+
 /**
  * 잠실야구장·고척스카이돔 인근 실존 술집·음식점 기반 Mock Place.
  * 상호·도로명 주소는 공개 지도·리뷰 기준. 좌표는 OSM Nominatim 조회값(동일 골목은 미세 오프셋).
@@ -36,7 +43,7 @@ export const mockPlaces: Place[] = [
     lng: 127.0817557,
     phone: "0507-1332-7686",
     categoryName: "맥주,호프",
-    coverImageUrl: placeholderImage("펍마이마이", "#1d4ed8"),
+    coverImageUrl: mymyPhoto("01.jpg"),
     createdAt: "2026-03-01T10:00:00.000Z",
     events: [
       {
@@ -52,28 +59,103 @@ export const mockPlaces: Place[] = [
         id: "report-j01-1",
         placeId: "place-jamsil-01",
         authorId: "mock-user-1",
-        authorNickname: "잠실응원단",
+        authorNickname: "몰몽몽",
         sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
-        watchedAt: "2026-07-10T19:00:00",
+        watchedAt: "2026-07-29T19:30:00",
         review:
-          "1~3층 전부 대형 스크린이라 LG 경기 보기 최고. 소리도 빵빵합니다.",
-        tagIds: ["big-screen", "match-sound", "group-seating", "loud-cheer"],
-        images: [placeholderImage("후기1", "#2563eb")],
-        likedByIds: ["mock-user-2", "mock-user-3"],
-        createdAt: "2026-08-02T10:30:00.000Z",
+          "야구 관람 술집으로 유명해서 왔는데 진짜 좋아요👍 룸·층마다 중계가 달라서 직관 보는 느낌이고 음식도 맛있어서 또 올 거예요. 야구 보면서 한잔하고 싶은 분께 강추!",
+        tagIds: ["big-screen", "match-sound", "good-food", "group-seating", "loud-cheer"],
+        images: [mymyPhoto("04.jpg"), mymyPhoto("06.jpg")],
+        likedByIds: ["mock-user-2", "mock-user-3", "guest-demo-1"],
+        createdAt: "2026-07-29T22:10:00.000Z",
       },
       {
         id: "report-j01-2",
         placeId: "place-jamsil-01",
         authorId: "mock-user-2",
+        authorNickname: "잠실응원단",
+        sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
+        watchedAt: "2026-08-03T20:00:00",
+        review:
+          "4층까지 있고 층마다 대형 스크린이라 야구 보기 최고예요. 스텔라 생맥·바베큐 피자 추천! 친구·동료랑 단체로 놀러 오기에도 좋아요.",
+        tagIds: ["big-screen", "good-beer", "good-food", "group-seating"],
+        images: [mymyPhoto("03.jpg"), mymyPhoto("02.jpg")],
+        likedByIds: ["mock-user-1", "mock-user-4"],
+        createdAt: "2026-08-03T22:40:00.000Z",
+      },
+      {
+        id: "report-j01-3",
+        placeId: "place-jamsil-01",
+        authorId: "mock-user-3",
         authorNickname: "야구덕후",
         sportTeams: [{ sportId: "baseball", teamIds: ["doosan-bears"] }],
-        watchedAt: "2026-06-20T19:00:00",
-        review: "더비·개막전은 만석이라 예약 필수. 뒤풀이 자리로도 좋아요.",
-        tagIds: ["big-screen", "match-sound", "loud-cheer"],
-        images: [],
+        watchedAt: "2026-06-13T18:40:00",
+        review:
+          "내부가 생각보다 훨씬 넓고 쾌적해서 놀랐어요. 치킨·피자·파스타·감자튀김까지 퀄리티가 기대 이상이고, 경기 날이라 팬들이 많아 응원 분위기 진짜 좋았습니다. 단체 응원 추천!",
+        tagIds: ["group-seating", "loud-cheer", "good-food", "big-screen"],
+        images: [mymyPhoto("08.jpg"), mymyPhoto("05.jpg")],
         likedByIds: ["mock-user-1"],
-        createdAt: "2026-06-20T22:00:00.000Z",
+        createdAt: "2026-06-13T21:20:00.000Z",
+      },
+      {
+        id: "report-j01-4",
+        placeId: "place-jamsil-01",
+        authorId: "mock-user-4",
+        authorNickname: "피자파스타커플",
+        sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
+        watchedAt: "2026-07-06T20:10:00",
+        review:
+          "피자·파스타에 까다로운 입맛인데 둘 다 만족했어요. 펍인데 이 퀄리티 흔치 않아요. 메뉴·맛·가격·분위기 만점💖 또 올게요.",
+        tagIds: ["good-food", "good-beer", "quiet"],
+        images: [mymyPhoto("02.jpg")],
+        likedByIds: ["mock-user-2"],
+        createdAt: "2026-07-06T22:00:00.000Z",
+      },
+      {
+        id: "report-j01-5",
+        placeId: "place-jamsil-01",
+        authorId: "mock-user-1",
+        authorNickname: "티켓팅실패자",
+        sportTeams: [
+          { sportId: "baseball", teamIds: ["lg-twins", "doosan-bears"] },
+        ],
+        watchedAt: "2026-06-23T19:00:00",
+        review:
+          "예매 못해도 야구를 편히 즐길 수 있어서 좋아요. 주류·안주 선택지가 넓고 다양한 스포츠까지 볼 수 있으니 1석3조! 다음에 또 와야지~",
+        tagIds: ["big-screen", "good-beer", "good-food", "group-seating"],
+        images: [mymyPhoto("05.jpg"), mymyPhoto("07.jpg")],
+        likedByIds: ["mock-user-3", "guest-demo-2"],
+        createdAt: "2026-06-23T21:45:00.000Z",
+      },
+      {
+        id: "report-j01-6",
+        placeId: "place-jamsil-01",
+        authorId: "mock-user-2",
+        authorNickname: "더비응원단",
+        sportTeams: [
+          { sportId: "baseball", teamIds: ["lg-twins", "doosan-bears"] },
+        ],
+        watchedAt: "2026-07-31T19:50:00",
+        review:
+          "LG·두산 연장까지 가는 날 왔는데 스크린이 커서 몰입감 최고! 생맥주 건배하며 응원하니 직관 부럽지 않았어요. 매장도 넓고 다트·농구게임도 있어서 재밌습니다.",
+        tagIds: ["big-screen", "match-sound", "loud-cheer", "good-beer"],
+        images: [mymyPhoto("04.jpg"), mymyPhoto("06.jpg")],
+        likedByIds: ["mock-user-1", "mock-user-4"],
+        createdAt: "2026-07-31T23:10:00.000Z",
+      },
+      {
+        id: "report-j01-7",
+        placeId: "place-jamsil-01",
+        authorId: "mock-user-3",
+        authorNickname: "잠실올때마다",
+        sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
+        watchedAt: "2026-08-03T17:20:00",
+        review:
+          "버드와이저 생맥에 LG 중계 조합 최고. 네온·테라스 분위기도 좋고 잠실 올 때마다 들르기 좋아요. 피자·치킨도 같이 시키면 든든합니다.",
+        tagIds: ["good-beer", "big-screen", "good-food", "loud-cheer"],
+        images: [mymyPhoto("08.jpg"), mymyPhoto("03.jpg")],
+        likedByIds: ["mock-user-2", "guest-demo-1"],
+        createdAt: "2026-08-03T20:05:00.000Z",
       },
     ],
   },
@@ -86,7 +168,7 @@ export const mockPlaces: Place[] = [
     lng: 127.0819,
     phone: "0507-1313-9614",
     categoryName: "요리주점",
-    coverImageUrl: placeholderImage("야구는핑계고", "#b45309"),
+    coverImageUrl: pinggyegoPhoto("01.jpg"),
     createdAt: "2026-03-02T10:00:00.000Z",
     events: [
       {
@@ -102,14 +184,117 @@ export const mockPlaces: Place[] = [
         id: "report-j02-1",
         placeId: "place-jamsil-02",
         authorId: "mock-user-3",
-        authorNickname: "축구팬",
+        authorNickname: "잠실직관러",
         sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
-        watchedAt: "2026-07-05T19:00:00",
+        watchedAt: "2026-08-01T19:20:00",
         review:
-          "대형 스크린이 여러 대라 원하는 경기 골라 보기 좋아요. 안주도 든든합니다.",
+          "대형 스크린이 여러 대라 원하는 경기 골라 보기 좋아요. 안주도 든든하고 응원 분위기 제대로입니다.",
         tagIds: ["big-screen", "match-sound", "good-food", "loud-cheer"],
-        images: [placeholderImage("중계", "#b45309")],
-        createdAt: "2026-08-01T18:00:00.000Z",
+        images: [pinggyegoPhoto("03.jpg")],
+        likedByIds: ["mock-user-1", "mock-user-2", "guest-demo-1"],
+        createdAt: "2026-08-01T21:10:00.000Z",
+      },
+      {
+        id: "report-j02-2",
+        placeId: "place-jamsil-02",
+        authorId: "mock-user-1",
+        authorNickname: "핑계고단골",
+        sportTeams: [{ sportId: "baseball", teamIds: ["doosan-bears"] }],
+        watchedAt: "2026-07-24T18:40:00",
+        review:
+          "야구 끝나고 들렀는데 우삼겹 짬뽕탕이 소주 안주로 최고였어요. 메뉴·기본 안주 다 괜찮고, 다음엔 직관 대신 여기서 중계 보고 싶어요!",
+        tagIds: ["good-food", "good-beer", "group-seating", "loud-cheer"],
+        images: [pinggyegoPhoto("06.jpg"), pinggyegoPhoto("07.jpg")],
+        likedByIds: ["mock-user-2", "mock-user-4"],
+        createdAt: "2026-07-24T22:05:00.000Z",
+      },
+      {
+        id: "report-j02-3",
+        placeId: "place-jamsil-02",
+        authorId: "mock-user-2",
+        authorNickname: "스크린3면러",
+        sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
+        watchedAt: "2026-07-25T19:10:00",
+        review:
+          "스크린이 커서 야구 보기 딱이고 매장이 시원해서 이 날씨에 너무 좋아요!! 음식도 맛있고 사장님도 친절해서 또 올 듯 💜",
+        tagIds: ["big-screen", "good-food", "good-view", "quiet"],
+        images: [pinggyegoPhoto("10.jpg"), pinggyegoPhoto("05.jpg")],
+        likedByIds: ["mock-user-1"],
+        createdAt: "2026-07-25T21:30:00.000Z",
+      },
+      {
+        id: "report-j02-4",
+        placeId: "place-jamsil-02",
+        authorId: "mock-user-4",
+        authorNickname: "티켓팅실패자",
+        sportTeams: [
+          { sportId: "baseball", teamIds: ["lg-twins", "doosan-bears"] },
+        ],
+        watchedAt: "2026-06-28T17:50:00",
+        review:
+          "잠실 티켓팅 실패하고 왔는데… 여기서 먹으며 보니 오히려 좋네요. 대형 스크린에 경기 감도 살아서 한 번에 여러 경기 돌려봤어요. 앞으로 직관 못 가면 여기로!",
+        tagIds: ["big-screen", "match-sound", "group-seating", "good-beer"],
+        images: [pinggyegoPhoto("04.jpg"), pinggyegoPhoto("01.jpg")],
+        likedByIds: ["mock-user-1", "mock-user-3", "guest-demo-2"],
+        createdAt: "2026-06-28T20:40:00.000Z",
+      },
+      {
+        id: "report-j02-5",
+        placeId: "place-jamsil-02",
+        authorId: "mock-user-1",
+        authorNickname: "전구단중계팬",
+        sportTeams: [{ sportId: "baseball", teamIds: ["doosan-bears"] }],
+        watchedAt: "2026-07-28T19:00:00",
+        review:
+          "야구 중계 거의 다 볼 수 있어서 좋아요. 사장님·직원분 다 친절하시고 짬뽕탕 맛있어요. 흡연실도 있어서 편한 편입니다.",
+        tagIds: ["big-screen", "good-food", "good-beer"],
+        images: [pinggyegoPhoto("02.jpg")],
+        likedByIds: ["mock-user-4"],
+        createdAt: "2026-07-28T22:15:00.000Z",
+      },
+      {
+        id: "report-j02-6",
+        placeId: "place-jamsil-02",
+        authorId: "mock-user-2",
+        authorNickname: "잠실올때마다",
+        sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
+        watchedAt: "2026-08-02T14:30:00",
+        review:
+          "야구 보기 좋아요! 음식 맛있고 매장 시원해서 잠실 올 때마다 자주 들를 것 같아요. 친구랑 단체로 와도 자리 잡기 괜찮았습니다.",
+        tagIds: ["big-screen", "group-seating", "good-food", "loud-cheer"],
+        images: [pinggyegoPhoto("08.jpg")],
+        likedByIds: ["mock-user-3", "guest-demo-1"],
+        createdAt: "2026-08-02T16:00:00.000Z",
+      },
+      {
+        id: "report-j02-7",
+        placeId: "place-jamsil-02",
+        authorId: "mock-user-3",
+        authorNickname: "더비응원단",
+        sportTeams: [
+          { sportId: "baseball", teamIds: ["lg-twins", "doosan-bears"] },
+        ],
+        watchedAt: "2026-07-31T18:20:00",
+        review:
+          "LG·두산 더비 날 왔는데 음향·화면 다 확실해요. 응원 소리도 적당히 살아서 직관 분위기 납니다. 맥주·치킨 조합 추천!",
+        tagIds: ["match-sound", "loud-cheer", "good-beer", "good-food"],
+        images: [pinggyegoPhoto("02.jpg")],
+        likedByIds: ["mock-user-1", "mock-user-2", "mock-user-4"],
+        createdAt: "2026-07-31T21:00:00.000Z",
+      },
+      {
+        id: "report-j02-8",
+        placeId: "place-jamsil-02",
+        authorId: "mock-user-4",
+        authorNickname: "예약한팬",
+        sportTeams: [{ sportId: "baseball", teamIds: ["lg-twins"] }],
+        watchedAt: "2026-07-20T12:10:00",
+        review:
+          "점심에 예약하고 갔어요. 대기 없이 바로 입장했고 스크린 앞에서 경기 보며 식사하기 좋았습니다. 대화하기에도 부담 없는 편이었어요.",
+        tagIds: ["big-screen", "good-view", "quiet", "good-food"],
+        images: [pinggyegoPhoto("09.jpg")],
+        likedByIds: [],
+        createdAt: "2026-07-20T14:00:00.000Z",
       },
     ],
   },

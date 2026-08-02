@@ -10,7 +10,7 @@ import type { PlaceSearchResult } from "@/features/places/types/naver-local-sear
 const PLACES_STORAGE_KEY = "fan-map:places";
 const PLACES_SEED_VERSION_KEY = "fan-map:places-seed-version";
 /** mockPlaces 실존 상호 갱신 시 증가 — 로컬 시드 재동기화 */
-const MOCK_SEED_VERSION = 6;
+const MOCK_SEED_VERSION = 9;
 
 const LEGACY_AUTHORS = [
   { authorId: "mock-user-1", authorNickname: "잠실응원단" },
