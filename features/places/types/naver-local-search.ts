@@ -7,7 +7,6 @@ export type LocalSearchResult = {
   lng: number;
   phone?: string;
   categoryName?: string;
-  naverMapUrl?: string;
 };
 
 export type PlaceSearchResult = LocalSearchResult;

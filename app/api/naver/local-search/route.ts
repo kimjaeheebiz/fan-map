@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { buildNaverMapSearchUrl } from "@/features/places/lib/naver-local-search";
 import type { LocalSearchResult } from "@/features/places/types/naver-local-search";
 
 const NAVER_LOCAL_SEARCH_URL =
@@ -105,7 +104,6 @@ export async function GET(request: Request) {
       lng,
       phone: item.telephone?.trim() || undefined,
       categoryName: item.category?.trim() || undefined,
-      naverMapUrl: buildNaverMapSearchUrl(name, address),
     });
   }
 

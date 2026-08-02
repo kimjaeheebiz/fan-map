@@ -9,7 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ImagePicker } from "@/features/places/components/image-picker";
-import { sports, teams, venueTags } from "@/features/catalog/constants";
+import {
+  sports,
+  teams,
+  venueTagCategoryLabels,
+  venueTagCategoryOrder,
+  venueTags,
+} from "@/features/catalog/constants";
 import {
   getDefaultReportFormValues,
   reportFormSchema,
@@ -18,6 +24,14 @@ import {
 import type { PlaceDraft } from "@/features/places/data/place-storage";
 import type { SportId } from "@/features/catalog/types";
 import { cn } from "@/lib/utils";
+
+const tagsByCategory = venueTagCategoryOrder
+  .map((category) => ({
+    category,
+    label: venueTagCategoryLabels[category],
+    tags: venueTags.filter((tag) => tag.category === category),
+  }))
+  .filter((group) => group.tags.length > 0);
 
 type ReportFormProps = {
   placeDraft: PlaceDraft;
@@ -125,6 +139,39 @@ export function ReportForm({
         <p className="text-muted-foreground mt-1 text-xs">{placeDraft.address}</p>
       </div>
 
+      <ImagePicker
+        value={images}
+        onChange={(next) => setValue("images", next, { shouldDirty: true })}
+        disabled={submitting}
+      />
+
+      <div className="space-y-2">
+        <p className="text-sm font-medium">태그</p>
+        {tagsByCategory.map((group) => (
+          <div key={group.category} className="flex items-start gap-2">
+            <p className="text-muted-foreground mt-1.5 w-12 shrink-0 text-xs font-medium">
+              {group.label}
+            </p>
+            <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
+              {group.tags.map((tag) => {
+                const selected = tagIds.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => toggleTag(tag.id)}
+                  >
+                    <Badge variant={selected ? "default" : "outline"}>
+                      {tag.label}
+                    </Badge>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm font-medium">종목 · 팀</p>
@@ -150,9 +197,9 @@ export function ReportForm({
           return (
             <div
               key={`${set.sportId}-${index}`}
-              className="space-y-3 rounded-lg border px-3 py-3"
+              className="space-y-1 rounded-lg border px-4 py-2.5"
             >
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center justify-between gap-2">
                 <p className="text-muted-foreground text-xs font-medium">
                   종목 {index + 1}
                 </p>
@@ -169,11 +216,11 @@ export function ReportForm({
                 )}
               </div>
 
-              <div className="space-y-2">
-                <p className="text-sm font-medium">
+              <div className="flex items-start gap-2">
+                <p className="text-muted-foreground mt-1.5 w-9 shrink-0 text-xs font-medium">
                   종목 <span className="text-destructive">*</span>
                 </p>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
                   {sports.map((sport) => {
                     const selected = set.sportId === sport.id;
                     const takenByOther =
@@ -196,9 +243,11 @@ export function ReportForm({
               </div>
 
               {teamOptions.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">팀</p>
-                  <div className="flex flex-wrap gap-1.5">
+                <div className="flex items-start gap-2">
+                  <p className="text-muted-foreground mt-1.5 w-9 shrink-0 text-xs font-medium">
+                    팀
+                  </p>
+                  <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
                     {teamOptions.map((team) => {
                       const selected = selectedTeamIds.includes(team.id);
                       return (
@@ -257,32 +306,6 @@ export function ReportForm({
           />
         )}
       </FormField>
-
-      <div className="space-y-2">
-        <p className="text-sm font-medium">태그</p>
-        <div className="flex flex-wrap gap-1.5">
-          {venueTags.map((tag) => {
-            const selected = tagIds.includes(tag.id);
-            return (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => toggleTag(tag.id)}
-              >
-                <Badge variant={selected ? "default" : "outline"}>
-                  {tag.label}
-                </Badge>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <ImagePicker
-        value={images}
-        onChange={(next) => setValue("images", next, { shouldDirty: true })}
-        disabled={submitting}
-      />
 
       <p className="text-muted-foreground text-xs">
         이 장소에 다녀온 경험을 남겨 주세요. 매장 사정은 날마다 달라질 수 있으니

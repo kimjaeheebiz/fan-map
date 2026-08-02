@@ -10,9 +10,10 @@ import {
   getActivePlaceEvent,
   getPlaceLiveSummary,
   getPlaceSportsRanked,
+  getPlaceTagIds,
   getReportCount,
 } from "@/features/places/lib/place-helpers";
-import { getSportName, getTagLabel } from "@/features/catalog/constants";
+import { getSportName, selectListTags } from "@/features/catalog/constants";
 import { SportIcon } from "@/features/catalog/sport-icons";
 import { useFavoritePlaceIds } from "@/features/places/hooks/use-favorite-place-ids";
 import { PlaceEventBadge } from "@/features/places/components/place-event-badge";
@@ -57,11 +58,7 @@ export function PlaceList({
       );
       return;
     }
-    const next = toggleFavorite(placeId);
-    if (next == null) return;
-    toast.success(
-      next ? "즐겨찾기에 추가했습니다." : "즐겨찾기를 해제했습니다.",
-    );
+    if (toggleFavorite(placeId) == null) return;
   }
 
   return (
@@ -75,12 +72,9 @@ export function PlaceList({
         const favorited = isFavorite(place.id);
         const live = getPlaceLiveSummary(place);
         const activeEvent = getActivePlaceEvent(place);
-        const amenityLabels = [
-          live.amenities.hasScreen ? "대형스크린" : null,
-          live.amenities.hasSound ? "경기음향" : null,
-          live.amenities.goodForGroup ? "단체 가능" : null,
-          ...live.amenities.tagIds.slice(0, 2).map(getTagLabel),
-        ].filter(Boolean) as string[];
+        const { tags: listTags, overflow: tagOverflow } = selectListTags(
+          getPlaceTagIds(place),
+        );
 
         return (
           <Card
@@ -186,17 +180,25 @@ export function PlaceList({
                     </p>
                   ) : null}
 
-                  {amenityLabels.length > 0 ? (
+                  {listTags.length > 0 ? (
                     <div className="mt-2 flex flex-wrap gap-1">
-                      {amenityLabels.slice(0, 3).map((label) => (
+                      {listTags.map((tag) => (
                         <Badge
-                          key={label}
+                          key={tag.id}
                           variant="secondary"
                           className="rounded-md px-1.5 py-0 text-[10px] font-medium"
                         >
-                          {label}
+                          {tag.label}
                         </Badge>
                       ))}
+                      {tagOverflow > 0 ? (
+                        <Badge
+                          variant="secondary"
+                          className="rounded-md px-1.5 py-0 text-[10px] font-medium"
+                        >
+                          +{tagOverflow}
+                        </Badge>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

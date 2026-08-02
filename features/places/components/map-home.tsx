@@ -152,9 +152,6 @@ export function MapHome() {
     }
     lastLocatedKeyRef.current = key;
     mapRef.current?.panTo(position.lat, position.lng, 15);
-    if (intent === "manual") {
-      toast.success("현재 위치로 이동했습니다.");
-    }
     locateIntentRef.current = "idle";
     initialRegionSyncedRef.current = true;
     syncListToMapBounds();
@@ -267,7 +264,6 @@ export function MapHome() {
       toast.message("이 지역에 등록된 장소가 없습니다.");
       return;
     }
-    toast.success(`이 지역에서 ${next.length}곳을 찾았습니다.`);
   }
 
   function getEmptyState() {

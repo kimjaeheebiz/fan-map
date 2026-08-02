@@ -11,10 +11,13 @@ export function addressForMapSearch(address: string) {
   return match?.[1] ?? trimmed;
 }
 
-/** Place ID 없이 상호명+도로명(번지까지)으로 네이버 지도 검색 페이지를 연다. */
+/**
+ * 네이버 지도 — 도로명(번지까지)+상호 검색.
+ * 예: "서울 송파구 백제고분로7길 24-7 펍마이마이"
+ */
 export function buildNaverMapSearchUrl(name: string, address?: string) {
   const mapAddress = address ? addressForMapSearch(address) : "";
-  const query = [name.trim(), mapAddress].filter(Boolean).join(" ");
+  const query = [mapAddress, name.trim()].filter(Boolean).join(" ");
   if (!query) return undefined;
   return `https://map.naver.com/p/search/${encodeURIComponent(query)}`;
 }

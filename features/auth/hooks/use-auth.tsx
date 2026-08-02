@@ -9,15 +9,24 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { AuthUser, KakaoPendingProfile } from "@/features/auth/types";
+import type {
+  AuthProviderId,
+  AuthUser,
+  KakaoPendingProfile,
+  SocialAuthProviderId,
+} from "@/features/auth/types";
 import {
   AUTH_CHANGED_EVENT,
   beginKakaoSignupMock,
   clearSession,
   completeKakaoSignup as completeKakaoSignupStorage,
   deleteAccount as deleteAccountStorage,
+  loginWithEmailMock,
+  loginWithSocialMock,
   readKakaoPending,
+  readLastAuthProvider,
   readSessionUser,
+  registerWithEmailMock,
   startKakaoLoginMock,
   updateProfile as updateProfileStorage,
 } from "@/features/auth/lib/auth-storage";
@@ -27,6 +36,18 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isReady: boolean;
   pendingKakao: KakaoPendingProfile | null;
+  lastAuthProvider: AuthProviderId | null;
+  loginWithSocialMock: (provider: SocialAuthProviderId) => AuthUser;
+  loginWithEmailMock: (input: {
+    email: string;
+    password: string;
+  }) => AuthUser;
+  registerWithEmailMock: (input: {
+    email: string;
+    password: string;
+    nickname: string;
+  }) => AuthUser;
+  /** @deprecated loginWithSocialMock("kakao") 사용 */
   loginWithKakaoMock: () => { status: "logged_in" | "needs_signup" };
   prepareKakaoSignup: () => KakaoPendingProfile;
   completeKakaoSignup: (nickname: string) => AuthUser;
@@ -43,16 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [pendingKakao, setPendingKakao] = useState<KakaoPendingProfile | null>(
     null,
   );
+  const [lastAuthProvider, setLastAuthProvider] =
+    useState<AuthProviderId | null>(null);
   const [isReady, setIsReady] = useState(false);
 
   const refresh = useCallback(() => {
     setUser(readSessionUser());
     setPendingKakao(readKakaoPending());
+    setLastAuthProvider(readLastAuthProvider());
     setIsReady(true);
   }, []);
 
   useEffect(() => {
-    // 마운트 직후 동기 setState는 cascading render로 간주되므로 한 틱 미룸
     const frame = requestAnimationFrame(() => {
       refresh();
     });
@@ -69,6 +92,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener(AUTH_CHANGED_EVENT, onChange);
     };
   }, [refresh]);
+
+  const loginSocial = useCallback(
+    (provider: SocialAuthProviderId) => {
+      const next = loginWithSocialMock(provider);
+      refresh();
+      return next;
+    },
+    [refresh],
+  );
+
+  const loginEmail = useCallback(
+    (input: { email: string; password: string }) => {
+      const next = loginWithEmailMock(input);
+      refresh();
+      return next;
+    },
+    [refresh],
+  );
+
+  const registerEmail = useCallback(
+    (input: { email: string; password: string; nickname: string }) => {
+      const next = registerWithEmailMock(input);
+      refresh();
+      return next;
+    },
+    [refresh],
+  );
 
   const loginWithKakaoMock = useCallback(() => {
     const result = startKakaoLoginMock();
@@ -116,6 +166,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: user != null,
       isReady,
       pendingKakao,
+      lastAuthProvider,
+      loginWithSocialMock: loginSocial,
+      loginWithEmailMock: loginEmail,
+      registerWithEmailMock: registerEmail,
       loginWithKakaoMock,
       prepareKakaoSignup,
       completeKakaoSignup,
@@ -128,6 +182,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       isReady,
       pendingKakao,
+      lastAuthProvider,
+      loginSocial,
+      loginEmail,
+      registerEmail,
       loginWithKakaoMock,
       prepareKakaoSignup,
       completeKakaoSignup,

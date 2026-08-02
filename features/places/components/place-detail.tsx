@@ -4,17 +4,21 @@ import { useState, type ReactNode } from "react";
 import {
   getLatestReport,
   getActivePlaceEvent,
-  getPlaceAmenityFlags,
   getPlaceGalleryImages,
   getPlaceLiveSummary,
   getPlaceSportIds,
+  getPlaceTagIds,
   getReportCount,
   getTopTeamShortNames,
 } from "@/features/places/lib/place-helpers";
 import { PlaceEventBanner } from "@/features/places/components/place-event-banner";
 import { PlaceImageGallery } from "@/features/places/components/place-image-gallery";
 import { PlaceReportItem } from "@/features/places/components/place-report-card";
-import { getSportName, getTagLabel } from "@/features/catalog/constants";
+import {
+  getSportName,
+  getTagLabel,
+  sortTagIdsByPriority,
+} from "@/features/catalog/constants";
 import { SportIcon } from "@/features/catalog/sport-icons";
 import type { Place, ViewingReport } from "@/features/places/types";
 import {
@@ -26,6 +30,11 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SheetDragArea } from "@/features/places/components/bottom-sheet";
 import {
   ArrowLeft,
@@ -41,6 +50,8 @@ import { authNav } from "@/config/navigation";
 import { useFavoritePlaceIds } from "@/features/places/hooks/use-favorite-place-ids";
 import { usePlaces } from "@/features/places/hooks/use-places";
 import { buildNaverMapSearchUrl } from "@/features/places/lib/naver-local-search";
+import { buildKakaoMapUrl } from "@/features/places/lib/kakao-map-link";
+import { buildGoogleMapUrl } from "@/features/places/lib/google-map-link";
 import { ReportActivityIcon } from "@/features/places/components/report-activity-icon";
 import { toast } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
@@ -74,18 +85,13 @@ export function PlaceDetail({
   const sports = getPlaceSportIds(place);
   const live = getPlaceLiveSummary(place);
   const activeEvent = getActivePlaceEvent(place);
-  const amenities = getPlaceAmenityFlags(place);
   const teamNames = getTopTeamShortNames(place, 4);
+  const placeTags = sortTagIdsByPriority(getPlaceTagIds(place));
   const { isFavorite, toggleFavorite } = useFavoritePlaceIds();
   const favorited = isFavorite(place.id);
   const naverMapUrl = buildNaverMapSearchUrl(place.name, place.address);
-
-  const amenityTags = [
-    amenities.hasScreen ? "대형스크린" : null,
-    amenities.hasSound ? "경기음향" : null,
-    amenities.goodForGroup ? "단체 가능" : null,
-    ...amenities.tagIds.map(getTagLabel),
-  ].filter(Boolean) as string[];
+  const kakaoMapUrl = buildKakaoMapUrl(place.name, place.address);
+  const googleMapUrl = buildGoogleMapUrl(place.name, place.address);
 
   function handleToggleFavorite() {
     if (!isReady) return;
@@ -97,11 +103,7 @@ export function PlaceDetail({
       );
       return;
     }
-    const next = toggleFavorite(place.id);
-    if (next == null) return;
-    toast.success(
-      next ? "즐겨찾기에 추가했습니다." : "즐겨찾기를 해제했습니다.",
-    );
+    if (toggleFavorite(place.id) == null) return;
   }
 
   async function handleShare() {
@@ -134,7 +136,6 @@ export function PlaceDetail({
     setRefreshing(true);
     try {
       await refetch();
-      toast.success("목록을 새로고침했습니다.");
     } catch {
       toast.error("새로고침에 실패했습니다.");
     } finally {
@@ -241,36 +242,58 @@ export function PlaceDetail({
 
           <PlaceImageGallery images={galleryImages} />
 
-          <div className="min-w-0 space-y-1 text-sm">
-            <p className="break-words">{place.address}</p>
-            {naverMapUrl && (
-              <a
-                href={naverMapUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-primary text-sm underline underline-offset-4 hover:opacity-80"
-              >
-                네이버 지도에서 보기
-              </a>
-            )}
+          <div className="flex min-w-0 items-start gap-2">
+            <p className="min-w-0 flex-1 break-words text-sm">{place.address}</p>
+            <div className="flex shrink-0 items-center gap-2 pt-0.5">
+              {naverMapUrl ? (
+                <ExternalMapLink
+                  href={naverMapUrl}
+                  label="네이버 지도"
+                  src="/brand/naver-map.png"
+                />
+              ) : null}
+              {kakaoMapUrl ? (
+                <ExternalMapLink
+                  href={kakaoMapUrl}
+                  label="카카오맵"
+                  src="/brand/kakao-map.png"
+                />
+              ) : null}
+              {googleMapUrl ? (
+                <ExternalMapLink
+                  href={googleMapUrl}
+                  label="구글맵"
+                  src="/brand/google-map.png"
+                />
+              ) : null}
+            </div>
           </div>
 
-          {(sports.length > 0 || amenityTags.length > 0) && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              {sports.map((id) => (
-                <span
-                  key={id}
-                  className="text-foreground inline-flex items-center gap-1 text-sm"
-                >
-                  <SportIcon sportId={id} className="size-3.5 shrink-0" />
-                  {getSportName(id)}
-                </span>
-              ))}
-              {amenityTags.map((label) => (
-                <Badge key={label} variant="secondary">
-                  {label}
-                </Badge>
-              ))}
+          {(sports.length > 0 || placeTags.length > 0) && (
+            <div className="space-y-3">
+              {sports.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {sports.map((id) => (
+                    <span
+                      key={id}
+                      className="text-foreground inline-flex items-center gap-1 text-sm"
+                    >
+                      <SportIcon sportId={id} className="size-3.5 shrink-0" />
+                      {getSportName(id)}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+
+              {placeTags.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {placeTags.map((tagId) => (
+                    <Badge key={tagId} variant="secondary">
+                      {getTagLabel(tagId)}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
             </div>
           )}
 
@@ -338,3 +361,34 @@ export function PlaceDetail({
     </div>
   );
 }
+
+function ExternalMapLink({
+  href,
+  label,
+  src,
+}: {
+  href: string;
+  label: string;
+  src: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={label}
+            className="inline-flex transition-opacity hover:opacity-80"
+          />
+        }
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt="" className="size-6 object-contain" />
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+

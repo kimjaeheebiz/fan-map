@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { authProviderLabels } from "@/features/auth/types";
 import { authNav } from "@/config/navigation";
 import { AccountPageShell } from "@/features/account/components/account-page-shell";
 import { FormField } from "@/components/common/form-field";
@@ -59,7 +60,9 @@ export default function ProfilePage() {
           <div className="bg-muted/40 space-y-2 rounded-lg px-3 py-3 text-sm">
             <div className="flex items-center justify-between gap-2">
               <span className="text-muted-foreground">로그인 방식</span>
-              <Badge variant="secondary">카카오</Badge>
+              <Badge variant="secondary">
+                {user ? authProviderLabels[user.provider] : "-"}
+              </Badge>
             </div>
             <div className="flex items-center justify-between gap-2">
               <span className="text-muted-foreground">회원 ID</span>

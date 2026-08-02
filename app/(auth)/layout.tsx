@@ -13,9 +13,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </span>
           <span>{appConfig.name}</span>
         </Link>
-        <p className="text-muted-foreground">
+        {/* <p className="text-muted-foreground">
           응원·방문 장소 지도
-        </p>
+        </p> */}
       </div>
       <Card className="w-full max-w-md gap-0 py-0">
         <CardContent className="p-(--card-spacing)">{children}</CardContent>

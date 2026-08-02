@@ -20,6 +20,7 @@ import {
   getSportName,
   getTagLabel,
   getTeamName,
+  sortTagIdsByPriority,
 } from "@/features/catalog/constants";
 import { SportIcon } from "@/features/catalog/sport-icons";
 import { PlaceImageGallery } from "@/features/places/components/place-image-gallery";
@@ -201,7 +202,7 @@ export function PlaceReportItem({
 
         {report.tagIds && report.tagIds.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {report.tagIds.map((tagId) => (
+            {sortTagIdsByPriority(report.tagIds).map((tagId) => (
               <Badge
                 key={tagId}
                 variant="secondary"

@@ -15,9 +15,6 @@ export type ViewingReport = {
   watchedAt: string;
   review: string;
   tagIds?: string[];
-  hasScreen?: boolean;
-  hasSound?: boolean;
-  goodForGroup?: boolean;
   images: string[]; // Base64 data URL only (max 5)
   createdAt: string;
 };
@@ -40,7 +37,6 @@ export type Place = {
   lng: number;
   phone?: string;
   categoryName?: string;
-  naverMapUrl?: string;
   coverImageUrl?: string; // 대표 이미지. 비어 있으면 첫 제보 images[0] 사용
   events?: PlaceEvent[];
   reports: ViewingReport[];

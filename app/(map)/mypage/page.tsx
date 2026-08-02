@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import {
   Bell,
   FileText,
@@ -14,6 +13,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { authProviderLabels } from "@/features/auth/types";
 import { authNav } from "@/config/navigation";
 import {
   AccountMenuList,
@@ -85,7 +85,6 @@ export default function MyPage() {
 
   function handleLogout() {
     logout();
-    toast.success("로그아웃되었습니다.");
     router.replace("/");
   }
 
@@ -111,7 +110,9 @@ export default function MyPage() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <p className="truncate font-medium">{user.nickname}</p>
-              <Badge variant="secondary">카카오</Badge>
+              <Badge variant="secondary">
+                {authProviderLabels[user.provider]}
+              </Badge>
             </div>
             <p className="text-muted-foreground mt-1 text-xs">
               마지막 로그인{" "}

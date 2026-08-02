@@ -5,6 +5,9 @@ import type { Place, ViewingReport } from "@/features/places/types";
 import type { PlaceSearchResult } from "@/features/places/types/naver-local-search";
 
 export const PLACES_STORAGE_KEY = "fan-map:places";
+const PLACES_SEED_VERSION_KEY = "fan-map:places-seed-version";
+/** mockPlaces 실존 상호 갱신 시 증가 — 로컬 시드 재동기화 */
+const MOCK_SEED_VERSION = 3;
 
 const LEGACY_AUTHORS = [
   { authorId: "mock-user-1", authorNickname: "잠실응원단" },
@@ -147,6 +150,55 @@ export function writePlacesToStorage(places: Place[]) {
   }
 }
 
+function readSeedVersion(): number {
+  if (typeof window === "undefined") return MOCK_SEED_VERSION;
+  const raw = window.localStorage.getItem(PLACES_SEED_VERSION_KEY);
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function writeSeedVersion(version: number) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(PLACES_SEED_VERSION_KEY, String(version));
+}
+
+function mergeMockPlaces(places: Place[]): Place[] {
+  const mockById = new Map(mockPlaces.map((place) => [place.id, place]));
+  const existingIds = new Set(places.map((place) => place.id));
+
+  const merged = places.map((place) => {
+    const mock = mockById.get(place.id);
+    if (!mock) return place;
+
+    const mockReportIds = new Set(mock.reports.map((report) => report.id));
+    const userReports = place.reports.filter(
+      (report) => !mockReportIds.has(report.id),
+    );
+
+    return {
+      ...place,
+      naverPlaceId: mock.naverPlaceId,
+      name: mock.name,
+      address: mock.address,
+      lat: mock.lat,
+      lng: mock.lng,
+      phone: mock.phone,
+      categoryName: mock.categoryName,
+      coverImageUrl: mock.coverImageUrl,
+      events: mock.events,
+      reports: [...mock.reports, ...userReports],
+    };
+  });
+
+  for (const mock of mockPlaces) {
+    if (!existingIds.has(mock.id)) {
+      merged.push(normalizePlace(mock));
+    }
+  }
+
+  return merged;
+}
+
 function mergeMockPlaceEvents(places: Place[]): Place[] {
   const mockById = new Map(mockPlaces.map((place) => [place.id, place]));
   return places.map((place) => {
@@ -159,10 +211,17 @@ function mergeMockPlaceEvents(places: Place[]): Place[] {
 export function seedPlacesIfEmpty(): Place[] {
   const existing = readPlacesFromStorage();
   if (existing) {
+    if (readSeedVersion() < MOCK_SEED_VERSION) {
+      const merged = mergeMockPlaces(existing);
+      writePlacesToStorage(merged);
+      writeSeedVersion(MOCK_SEED_VERSION);
+      return merged;
+    }
     return mergeMockPlaceEvents(existing);
   }
   const seeded = mockPlaces.map(normalizePlace);
   writePlacesToStorage(seeded);
+  writeSeedVersion(MOCK_SEED_VERSION);
   return seeded;
 }
 
@@ -184,7 +243,6 @@ export type PlaceDraft = Pick<
   | "lng"
   | "phone"
   | "categoryName"
-  | "naverMapUrl"
 >;
 
 export function placeDraftFromSearch(result: PlaceSearchResult): PlaceDraft {
@@ -196,7 +254,6 @@ export function placeDraftFromSearch(result: PlaceSearchResult): PlaceDraft {
     lng: result.lng,
     phone: result.phone,
     categoryName: result.categoryName,
-    naverMapUrl: result.naverMapUrl,
   };
 }
 
@@ -209,7 +266,6 @@ export function placeDraftFromPlace(place: Place): PlaceDraft {
     lng: place.lng,
     phone: place.phone,
     categoryName: place.categoryName,
-    naverMapUrl: place.naverMapUrl,
   };
 }
 
@@ -240,7 +296,6 @@ export function addReport(payload: AddReportPayload): Place {
     Object.assign(place, {
       phone: payload.placeDraft.phone ?? place.phone,
       categoryName: payload.placeDraft.categoryName ?? place.categoryName,
-      naverMapUrl: payload.placeDraft.naverMapUrl ?? place.naverMapUrl,
       naverPlaceId: payload.placeDraft.naverPlaceId ?? place.naverPlaceId,
     });
   }
@@ -268,10 +323,7 @@ export type UpdateReportPayload = {
   report: Pick<
     ViewingReport,
     "sportTeams" | "watchedAt" | "review" | "tagIds" | "images"
-  > &
-    Partial<
-      Pick<ViewingReport, "hasScreen" | "hasSound" | "goodForGroup">
-    >;
+  >;
   /** 본인 제보만 수정 가능 */
   editorId: string;
 };
@@ -302,9 +354,6 @@ export function updateReport(payload: UpdateReportPayload): Place {
     review: payload.report.review,
     tagIds: payload.report.tagIds,
     images: payload.report.images,
-    hasScreen: payload.report.hasScreen ?? current.hasScreen,
-    hasSound: payload.report.hasSound ?? current.hasSound,
-    goodForGroup: payload.report.goodForGroup ?? current.goodForGroup,
   };
 
   writePlacesToStorage(places);

@@ -1,4 +1,4 @@
-import { sports, teams } from "@/features/catalog/constants";
+import { sortTagIdsByPriority, sports, teams } from "@/features/catalog/constants";
 import type { SportId } from "@/features/catalog/types";
 import type {
   Place,
@@ -164,25 +164,13 @@ export function formatRelativeTime(iso: string) {
   return formatDate(iso);
 }
 
-export function getPlaceAmenityFlags(place: Place) {
-  let hasScreen = false;
-  let hasSound = false;
-  let goodForGroup = false;
+/** 장소 제보 tagIds 합집합 — 카테고리 우선순 정렬 */
+export function getPlaceTagIds(place: Place) {
   const tagIds = new Set<string>();
-
   for (const report of place.reports) {
-    if (report.hasScreen) hasScreen = true;
-    if (report.hasSound) hasSound = true;
-    if (report.goodForGroup) goodForGroup = true;
     for (const tagId of report.tagIds ?? []) tagIds.add(tagId);
   }
-
-  return {
-    hasScreen,
-    hasSound,
-    goodForGroup,
-    tagIds: [...tagIds],
-  };
+  return sortTagIdsByPriority([...tagIds]);
 }
 
 export function getTopTeamShortNames(place: Place, limit = 3) {
@@ -200,14 +188,12 @@ export function getPlaceLiveSummary(place: Place) {
   const recentCount = getRecentReportCount(place, 14);
   const latest = getLatestReport(place);
   const teamsLabel = getTopTeamShortNames(place).join(" · ");
-  const amenities = getPlaceAmenityFlags(place);
 
   return {
     todayCount,
     recentCount,
     latestRelative: latest ? formatRelativeTime(latest.createdAt) : null,
     teamsLabel,
-    amenities,
     isHot: todayCount > 0 || recentCount >= 2,
   };
 }

@@ -7,8 +7,8 @@ import {
   UserPen,
   UserRound,
 } from "lucide-react";
-import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { authProviderLabels } from "@/features/auth/types";
 import { authNav } from "@/config/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,6 @@ export function UserMenu() {
 
   function handleLogout() {
     logout();
-    toast.success("로그아웃되었습니다.");
     router.push("/");
   }
 
@@ -56,12 +55,12 @@ export function UserMenu() {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="rounded-full"
+            className="overflow-hidden p-0"
             aria-label="계정 메뉴"
           />
         }
       >
-        <Avatar size="sm">
+        <Avatar className="size-full after:hidden">
           <AvatarFallback>{nicknameInitial(user.nickname)}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -72,7 +71,9 @@ export function UserMenu() {
               <span className="text-foreground font-medium">
                 {user.nickname}
               </span>
-              <span className="text-muted-foreground text-xs">카카오 계정</span>
+              <span className="text-muted-foreground text-xs">
+                {user.email ?? `${authProviderLabels[user.provider]} 계정`}
+              </span>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
@@ -92,7 +93,7 @@ export function UserMenu() {
           내 정보 관리
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut />
           로그아웃
         </DropdownMenuItem>
