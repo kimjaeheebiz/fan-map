@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { PlaceList } from "@/features/places/components/place-list";
 import {
   BottomSheet,
@@ -16,6 +17,8 @@ type PlaceListSheetProps = {
   onSelectPlace: (placeId: string) => void;
   emptyTitle: string;
   emptyDescription: string;
+  emptyAction?: ReactNode;
+  listSubtitle?: string;
   placeCountLabel: string;
   onSnapChange?: (snap: SheetSnap) => void;
   onHeightChange?: (height: number) => void;
@@ -29,6 +32,8 @@ export function PlaceListSheet({
   onSelectPlace,
   emptyTitle,
   emptyDescription,
+  emptyAction,
+  listSubtitle = "주변 장소",
   placeCountLabel,
   onSnapChange,
   onHeightChange,
@@ -44,7 +49,7 @@ export function PlaceListSheet({
       <SheetDragArea className="shrink-0 px-4 pb-2">
         <p className="text-base font-bold tracking-tight">오늘 어디서 응원할까?</p>
         <p className="text-muted-foreground text-xs">
-          주변 장소 {placeCountLabel}
+          {listSubtitle} {placeCountLabel}
         </p>
       </SheetDragArea>
 
@@ -53,6 +58,7 @@ export function PlaceListSheet({
           <EmptyState
             title={emptyTitle}
             description={emptyDescription}
+            action={emptyAction}
             className="m-4 py-8"
           />
         ) : (

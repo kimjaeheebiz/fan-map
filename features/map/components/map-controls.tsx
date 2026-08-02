@@ -4,6 +4,12 @@ import { LocateFixed, RotateCcw, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+/** 지도 위 플로팅 — foreground/background 토큰이 테마에 따라 반전 */
+const mapOverlayButtonClassName = cn(
+  "pointer-events-auto border-transparent bg-foreground text-background shadow-md",
+  "hover:bg-foreground/90 hover:text-background",
+);
+
 type MapControlsProps = {
   onLocate: () => void;
   onResearch: () => void;
@@ -31,9 +37,8 @@ export function MapControls({
       <div className="pointer-events-none absolute inset-x-0 top-28 z-10 flex justify-center md:top-4">
         <Button
           type="button"
-          variant="secondary"
           size="sm"
-          className="pointer-events-auto shadow-md"
+          className={cn(mapOverlayButtonClassName, "rounded-full")}
           onClick={onResearch}
           disabled={researchDisabled}
         >
@@ -52,9 +57,8 @@ export function MapControls({
         {onOpenRanking ? (
           <Button
             type="button"
-            variant="secondary"
             size="icon"
-            className="pointer-events-auto shadow-md xl:hidden"
+            className={cn(mapOverlayButtonClassName, "xl:hidden")}
             aria-label="랭킹 보기"
             onClick={onOpenRanking}
           >
@@ -63,9 +67,8 @@ export function MapControls({
         ) : null}
         <Button
           type="button"
-          variant="secondary"
           size="icon"
-          className="pointer-events-auto shadow-md"
+          className={mapOverlayButtonClassName}
           aria-label="현재 위치로 이동"
           onClick={onLocate}
           disabled={locateLoading}

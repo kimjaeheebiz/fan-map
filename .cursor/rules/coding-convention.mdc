@@ -27,5 +27,6 @@ alwaysApply: true
 - 기준: `config/app.ts` `radius` → `--radius`
 - 화면에서 패널·카드용 `rounded-*` 임의 지정 금지
 - 블럭: `rounded-lg` (Card, Dialog, Table, Sonner, 팝오버)
-- 개별 요소: `rounded-md` (Input, Textarea, Select, Button, Badge, 이미지·썸네일 래퍼)
-- 원형: `rounded-full` / 풀블리드: `rounded-none`
+- 개별 요소: `rounded-md` (Input, Textarea, Select, Badge, 텍스트 Button)
+- 원형: `rounded-full` (아이콘 Button, 아바타, 칩) / 풀블리드: `rounded-none`
+- `rounded-full` 예외: 헤더·다녀왔어요 CTA, 「이 지역 검색」, 필터 칩

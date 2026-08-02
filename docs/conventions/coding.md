@@ -74,9 +74,19 @@ export interface FormDialogProps {
 | 타입 | 클래스 | 대상 |
 | --- | --- | --- |
 | 블럭 | `rounded-lg` (`--radius`) | Card, Dialog, Drawer, Table, Dropdown/Select 팝오버, Sonner, BottomSheet(`rounded-t-lg`) |
-| 개별 요소 | `rounded-md` (`--radius` × 0.8) | Input, Textarea, Select 트리거, Button, Badge, Tooltip, 이미지·썸네일 래퍼 |
-| 원형 | `rounded-full` | 아바타, 칩 레일, 핸들 |
+| 개별 요소 | `rounded-md` (`--radius` × 0.8) | Input, Textarea, Select 트리거, Badge, Tooltip, 이미지·썸네일 래퍼, **텍스트 Button** (`default`/`xs`/`sm`/`lg`) |
+| 원형 | `rounded-full` | 아바타, 칩 레일, 핸들, **아이콘 Button** (`icon`/`icon-xs`/`icon-sm`/`icon-lg`) |
 | 풀블리드 | `rounded-none` | 지도 스켈레톤 등 |
+
+**`rounded-full` 예외** (필·원형 CTA — `className`으로 명시)
+
+| 대상 | 예 |
+| --- | --- |
+| 헤더 CTA | 다녀왔어요, 로그인, 지도(비홈) |
+| 방문 CTA | 상세·빈 목록「다녀왔어요」 |
+| 지도 플로팅 | 「이 지역 검색」 |
+| 필터 칩 | 종목·이벤트·즐겨찾기 레일 |
 
 - 패널·모달은 `Card` / `Dialog` 등 UI를 조합해 radius를 상속
 - `app.ts`의 `radius`만 바꾸면 스케일 전체가 함께 변함
+- Button: base에 `rounded-*`를 두지 않고 size별 지정. `className`은 `cn(buttonVariants(...), className)`으로 병합

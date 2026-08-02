@@ -24,14 +24,17 @@ import {
   defaultPlaceFilters,
   filterPlaces,
   hasActivePlaceFilters,
+  matchesPlaceSearch,
 } from "@/features/places/lib/place-filters";
 import type { Place, ViewingReport } from "@/features/places/types";
 import { useMapShellReportAction } from "@/components/layout/map-shell";
 import { EmptyState } from "@/components/common/empty-state";
 import { Loading } from "@/components/common/loading";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PenLine } from "lucide-react";
 
 const MapView = dynamic(
   () =>
@@ -81,14 +84,19 @@ export function MapHome() {
     );
   }, [allPlaces, regionBounds]);
 
+  const searchActive = searchQuery.trim().length > 0;
+
+  /** 검색 중: 전체 등록 장소 / 평소: 이 지역 */
+  const listBasePlaces = searchActive ? allPlaces : regionPlaces;
+
   const displayPlaces = useMemo(
     () =>
-      filterPlaces(regionPlaces, {
+      filterPlaces(listBasePlaces, {
         searchQuery,
         filters,
         favoritePlaceIds,
       }),
-    [regionPlaces, searchQuery, filters, favoritePlaceIds],
+    [listBasePlaces, searchQuery, filters, favoritePlaceIds],
   );
 
   const filtersActive = hasActivePlaceFilters(filters, searchQuery);
@@ -260,17 +268,38 @@ export function MapHome() {
     }
   }
 
-  function getEmptyState() {
-    if (!regionBounds) {
+  function getEmptyState(): {
+    title: string;
+    description: string;
+    showAddCta?: boolean;
+  } {
+    if (!regionBounds && !searchActive) {
       return {
         title: "지도 위치를 확인하는 중…",
         description: "현재 위치 기준으로 주변 장소를 불러옵니다.",
       };
     }
+    if (searchActive) {
+      const searchHits = allPlaces.some((place) =>
+        matchesPlaceSearch(place, searchQuery),
+      );
+      if (!searchHits) {
+        return {
+          title: "등록된 장소에서 찾을 수 없습니다.",
+          description:
+            "검색어 변경이나, 다녀온 장소를 직접 남겨 주세요.",
+          showAddCta: true,
+        };
+      }
+      return {
+        title: "조건에 맞는 장소가 없습니다.",
+        description: "필터를 바꿔 보세요.",
+      };
+    }
     if (regionPlaces.length === 0) {
       return {
         title: "이 지역에 장소가 없습니다.",
-        description: "지도를 이동한 뒤 ‘이 지역 재검색’을 눌러 보세요.",
+        description: "지도를 이동한 뒤 ‘이 지역 검색’을 눌러 보세요.",
       };
     }
     if (filters.favoritesOnly && favoritePlaceIds.length === 0) {
@@ -284,12 +313,12 @@ export function MapHome() {
     if (filtersActive) {
       return {
         title: "조건에 맞는 장소가 없습니다.",
-        description: "검색어나 필터를 바꿔 보세요.",
+        description: "필터를 바꿔 보세요.",
       };
     }
     return {
       title: "이 지역에 장소가 없습니다.",
-      description: "지도를 이동한 뒤 ‘이 지역 재검색’을 눌러 보세요.",
+      description: "지도를 이동한 뒤 ‘이 지역 검색’을 눌러 보세요.",
     };
   }
 
@@ -370,11 +399,25 @@ export function MapHome() {
   }
 
   const emptyState = getEmptyState();
-  const placeCountLabel = `${displayPlaces.length}곳${
-    regionPlaces.length !== displayPlaces.length
-      ? ` · ${regionPlaces.length}곳 중`
-      : ""
-  }`;
+  const emptyAction = emptyState.showAddCta ? (
+    <Button
+      type="button"
+      size="sm"
+      className="rounded-full bg-report text-report-foreground hover:bg-report/90"
+      onClick={() => openReportDialog()}
+    >
+      <PenLine data-icon="inline-start" />
+      다녀왔어요
+    </Button>
+  ) : undefined;
+  const placeCountLabel = searchActive
+    ? `검색 ${displayPlaces.length}곳`
+    : `${displayPlaces.length}곳${
+        regionPlaces.length !== displayPlaces.length
+          ? ` · ${regionPlaces.length}곳 중`
+          : ""
+      }`;
+  const listSubtitle = searchActive ? "등록된 장소 검색" : "주변 장소";
 
   if (placesLoading) {
     return <Loading label="장소 불러오는 중..." className="h-full" />;
@@ -389,7 +432,7 @@ export function MapHome() {
               오늘 어디서 응원할까?
             </p>
             <p className="text-muted-foreground mt-0.5 text-xs">
-              주변 장소 {placeCountLabel}
+              {listSubtitle} {placeCountLabel}
             </p>
           </div>
           <MapHomeToolbar
@@ -406,6 +449,7 @@ export function MapHome() {
             <EmptyState
               title={emptyState.title}
               description={emptyState.description}
+              action={emptyAction}
               className="m-4 py-10"
             />
           ) : (
@@ -484,6 +528,8 @@ export function MapHome() {
               onSelectPlace={handleSelectPlaceFromList}
               emptyTitle={emptyState.title}
               emptyDescription={emptyState.description}
+              emptyAction={emptyAction}
+              listSubtitle={listSubtitle}
               placeCountLabel={placeCountLabel}
               onHeightChange={setSheetHeight}
             />

@@ -32,6 +32,7 @@ export function UserMenu() {
       <Button
         variant="outline"
         size="sm"
+        className="rounded-full"
         render={<Link href={authNav.login} />}
         nativeButton={false}
       >

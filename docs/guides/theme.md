@@ -35,6 +35,11 @@ Preset `b1aIcEaeG` 토큰 기준입니다.
 
 `--background`를 캔버스 색으로 바꾸면 Tabs·Switch 등이 함께 변합니다. 레이아웃 배경만 바꿀 때는 `--canvas`를 사용하세요.
 
+### 지도 위 플로팅 버튼
+
+`MapControls`(이 지역 검색·현재 위치·랭킹)는 `bg-foreground text-background`만 사용한다.  
+라이트/다크에서 `--foreground`·`--background`가 이미 반전하므로, `dark:bg-background` 등으로 다시 덮지 않는다.
+
 ## 상태 색 (Semantic)
 
 Tailwind / shadcn 기본에는 없습니다. Starter에서 `globals.css`에 추가한 토큰입니다.

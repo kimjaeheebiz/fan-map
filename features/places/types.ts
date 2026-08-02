@@ -15,7 +15,7 @@ export type ViewingReport = {
   watchedAt: string; // ISO 또는 yyyy-mm-dd(구데이터) — 방문 일시
   review: string;
   tagIds?: string[];
-  images: string[]; // Base64 data URL only (max 5)
+  images: string[]; // data URL 또는 public 경로 (목·업로드)
   likedByIds?: string[]; // 좋아요한 사용자·게스트 id
   createdAt: string;
 };

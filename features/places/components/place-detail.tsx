@@ -303,7 +303,7 @@ export function PlaceDetail({
           {onReport && (
             <Button
               type="button"
-              className="w-full bg-report text-report-foreground hover:bg-report/90"
+              className="w-full rounded-full bg-report text-report-foreground hover:bg-report/90"
               onClick={onReport}
             >
               <PenLine data-icon="inline-start" />
