@@ -9,6 +9,8 @@ export { EmptyState } from "@/components/common/empty-state";
 export { Loading } from "@/components/common/loading";
 export { AppSkeleton, Skeleton } from "@/components/common/app-skeleton";
 export { ThemeSwitcher } from "@/components/common/theme-switcher";
+export { ServiceModeSwitcher } from "@/components/common/service-mode-switcher";
+export type { ServiceModeId } from "@/components/common/service-mode-switcher";
 export { NotificationButton } from "@/components/common/notification-button";
 export { UserMenu } from "@/components/common/user-menu";
 export { ConfirmDialog } from "@/components/common/confirm-dialog";

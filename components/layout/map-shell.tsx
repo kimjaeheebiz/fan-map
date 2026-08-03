@@ -13,6 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Map, PenLine } from "lucide-react";
 import { appConfig } from "@/config/app";
 import { MoreMenu } from "@/components/common/more-menu";
+import { ServiceModeSwitcher } from "@/components/common/service-mode-switcher";
 import { ThemeSwitcher } from "@/components/common/theme-switcher";
 import { UserMenu } from "@/components/common/user-menu";
 import { Button } from "@/components/ui/button";
@@ -69,7 +70,7 @@ export function MapShell({ children }: MapShellProps) {
   return (
     <MapShellReportContext.Provider value={registerReport}>
       <div className="bg-canvas flex h-dvh w-full flex-col overflow-hidden">
-        <header className="border-border bg-card flex h-14 shrink-0 items-center gap-3 border-b px-4">
+        <header className="border-border bg-card flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <Link
             href="/"
             className="flex shrink-0 items-center gap-2 font-semibold"
@@ -79,6 +80,7 @@ export function MapShell({ children }: MapShellProps) {
             </span>
             <span>{appConfig.name}</span>
           </Link>
+          <ServiceModeSwitcher />
           <div className="ml-auto flex items-center gap-1">
             {!isMapHome ? (
               <Button
